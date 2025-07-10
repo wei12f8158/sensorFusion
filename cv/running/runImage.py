@@ -191,6 +191,33 @@ def change_log_file(logger_ptr, fileName):
     new_fHandle = logging.FileHandler(fileName)
     logger_ptr.addHandler(new_fHandle)
 
+import numpy as np
+
+def parse_detections(metadata, intrinsics, imx500, picam2, threshold, iou, max_detections):
+    np_outputs = imx500.get_outputs(metadata, add_batch=True)
+    input_w, input_h = imx500.get_input_size()
+    if np_outputs is None:
+        return []
+    if intrinsics.postprocess == "nanodet":
+        boxes, scores, classes = postprocess_nanodet_detection(outputs=np_outputs[0], conf=threshold, iou_thres=iou, max_out_dets=max_detections)[0]
+        from picamera2.devices.imx500.postprocess import scale_boxes
+        boxes = scale_boxes(boxes, 1, 1, input_h, input_w, False, False)
+    else:
+        boxes, scores, classes = np_outputs[0][0], np_outputs[1][0], np_outputs[2][0]
+        if intrinsics.bbox_normalization:
+            boxes = boxes / input_h
+        if intrinsics.bbox_order == "xy":
+            boxes = boxes[:, [1, 0, 3, 2]]
+        boxes = np.array_split(boxes, 4, axis=1)
+        boxes = zip(*boxes)
+    class Detection:
+        def __init__(self, box, category, conf):
+            self.box = box
+            self.category = category
+            self.conf = conf
+    detections = [Detection(box, category, score) for box, score, category in zip(boxes, scores, classes) if score > threshold]
+    return detections
+
 if __name__ == "__main__":
     ## Set up the file saves
     imageFile = ""
@@ -371,30 +398,3 @@ if __name__ == "__main__":
     
 
     serialPort.close()      # close the serial port
-
-# Helper function for parsing detections
-import numpy as np
-def parse_detections(metadata, intrinsics, imx500, picam2, threshold, iou, max_detections):
-    np_outputs = imx500.get_outputs(metadata, add_batch=True)
-    input_w, input_h = imx500.get_input_size()
-    if np_outputs is None:
-        return []
-    if intrinsics.postprocess == "nanodet":
-        boxes, scores, classes = postprocess_nanodet_detection(outputs=np_outputs[0], conf=threshold, iou_thres=iou, max_out_dets=max_detections)[0]
-        from picamera2.devices.imx500.postprocess import scale_boxes
-        boxes = scale_boxes(boxes, 1, 1, input_h, input_w, False, False)
-    else:
-        boxes, scores, classes = np_outputs[0][0], np_outputs[1][0], np_outputs[2][0]
-        if intrinsics.bbox_normalization:
-            boxes = boxes / input_h
-        if intrinsics.bbox_order == "xy":
-            boxes = boxes[:, [1, 0, 3, 2]]
-        boxes = np.array_split(boxes, 4, axis=1)
-        boxes = zip(*boxes)
-    class Detection:
-        def __init__(self, box, category, conf):
-            self.box = box
-            self.category = category
-            self.conf = conf
-    detections = [Detection(box, category, score) for box, score, category in zip(boxes, scores, classes) if score > threshold]
-    return detections

@@ -47,10 +47,21 @@ def is_raspberry_pi():
     except:
         return False
 
+# Add IMX500 imports
+from picamera2 import Picamera2
+from picamera2.devices import IMX500
+from picamera2.devices.imx500 import (NetworkIntrinsics, postprocess_nanodet_detection)
+
+# Platform detection
 if machine == "aarch64":
     if is_raspberry_pi():
-        device = "rpi"
-        logger.info("Detected Raspberry Pi 5")
+        # Check for IMX500 config
+        if configs['runTime'].get('use_imx500', False):
+            device = "imx500"
+            logger.info("Detected Raspberry Pi 5 with IMX500")
+        else:
+            device = "rpi"
+            logger.info("Detected Raspberry Pi 5")
     else:
         device = "tpu"
         logger.info("Detected Coral Dev Board (TPU)")
@@ -212,6 +223,27 @@ if __name__ == "__main__":
                                            configs['runTime']['distSettings'])
         handObjDisp_2 = display.displayHandObject(configs, camNum=2)
     
+    # Add IMX500 initialization if needed
+    if device == "imx500":
+        imx500_model = configs['runTime']['imx500_model']
+        imx500_labels = configs['runTime'].get('imx500_labels', None)
+        imx500_threshold = configs['runTime'].get('imx500_threshold', 0.5)
+        imx500_iou = configs['runTime'].get('imx500_iou', 0.5)
+        imx500_max_detections = configs['runTime'].get('imx500_max_detections', 10)
+
+        imx500 = IMX500(imx500_model)
+        intrinsics = imx500.network_intrinsics
+        if not intrinsics:
+            intrinsics = NetworkIntrinsics()
+            intrinsics.task = "object detection"
+        if imx500_labels:
+            with open(imx500_labels, 'r') as f:
+                intrinsics.labels = f.read().splitlines()
+        intrinsics.update_with_defaults()
+        picam2 = Picamera2(imx500.camera_num)
+        config = picam2.create_preview_configuration(controls={"FrameRate": intrinsics.inference_rate}, buffer_count=12)
+        picam2.start(config, show_preview=False)
+
     ## Get image
     if configs['runTime']['imgSrc'] == 'camera':
         ## Load the camera
@@ -238,7 +270,24 @@ if __name__ == "__main__":
             dataRateTime[0] = (thisTime-startTime[0])
             if(dataRateTime[0]) >= frameTime: 
                 #logger.info(f"Get next image")
-                camStat[0], image_1, camTime_1 = inputCam_1.getImage()
+                if device == "imx500":
+                    # Get detections from IMX500
+                    metadata = picam2.capture_metadata()
+                    detections = parse_detections(metadata, intrinsics, imx500, picam2, imx500_threshold, imx500_iou, imx500_max_detections)
+                    # Convert detections to your expected format for downstream processing
+                    # For example, create a numpy array: [x, y, w, h, conf, class]
+                    results = []
+                    for det in detections:
+                        x, y, w, h = det.box
+                        conf = det.conf
+                        cls = det.category
+                        results.append([x, y, x+w, y+h, conf, cls])
+                    results = np.array(results)
+                    image_1 = picam2.capture_array()
+                    camTime_1 = int((time.time() - startTime[0]) * 1000)
+                    camStat[0] = True
+                else:
+                    camStat[0], image_1, camTime_1 = inputCam_1.getImage()
 
             if(configs['runTime']['nCameras'] == 2):
                 dataRateTime[1] = (thisTime-startTime[1])
@@ -246,7 +295,17 @@ if __name__ == "__main__":
                     camStat[1], image_2, camTime_2 = inputCam_2.getImage()
 
             if camStat[0]:
-                runCam[0] = handleImage(image_1, camTime_1, distCalc, handObjDisp, camId=1)
+                if device == "imx500":
+                    # Use IMX500 results directly
+                    validRes = distCalc.loadData(results)
+                    serialPort.sendString(timeMS=camTime_1, handConf=distCalc.handConf, 
+                        object=distCalc.grabObject[5], objectConf=distCalc.grabObject[4], distance=distCalc.bestDist)
+                    if configs['debugs']['dispResults']:
+                        exitStatus = handObjDisp.draw(image_1, distCalc, validRes, camId=1, imageFile=imageFile)
+                        if exitStatus == ord('q'):
+                            runCam[0] = False
+                else:
+                    runCam[0] = handleImage(image_1, camTime_1, distCalc, handObjDisp, camId=1)
                 logger.info(f"Total cam 1 time: {dataRateTime[0]*1000:.2f}ms, " \
                             f"{1/dataRateTime[0]:.1f}Hz, " \
                             f"Cap Time: {camTime_1}ms")
@@ -312,3 +371,30 @@ if __name__ == "__main__":
     
 
     serialPort.close()      # close the serial port
+
+# Helper function for parsing detections
+import numpy as np
+def parse_detections(metadata, intrinsics, imx500, picam2, threshold, iou, max_detections):
+    np_outputs = imx500.get_outputs(metadata, add_batch=True)
+    input_w, input_h = imx500.get_input_size()
+    if np_outputs is None:
+        return []
+    if intrinsics.postprocess == "nanodet":
+        boxes, scores, classes = postprocess_nanodet_detection(outputs=np_outputs[0], conf=threshold, iou_thres=iou, max_out_dets=max_detections)[0]
+        from picamera2.devices.imx500.postprocess import scale_boxes
+        boxes = scale_boxes(boxes, 1, 1, input_h, input_w, False, False)
+    else:
+        boxes, scores, classes = np_outputs[0][0], np_outputs[1][0], np_outputs[2][0]
+        if intrinsics.bbox_normalization:
+            boxes = boxes / input_h
+        if intrinsics.bbox_order == "xy":
+            boxes = boxes[:, [1, 0, 3, 2]]
+        boxes = np.array_split(boxes, 4, axis=1)
+        boxes = zip(*boxes)
+    class Detection:
+        def __init__(self, box, category, conf):
+            self.box = box
+            self.category = category
+            self.conf = conf
+    detections = [Detection(box, category, score) for box, score, category in zip(boxes, scores, classes) if score > threshold]
+    return detections

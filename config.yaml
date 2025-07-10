@@ -65,6 +65,14 @@ training:
     epochs: 30
 
 runTime:
+    # IMX500 settings   
+    use_imx500: True
+    imx500_model: "IMX500/final_output/network.rpk"
+    imx500_labels: "IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx_model/labels.txt"
+    imx500_threshold: 0.5
+    imx500_iou: 0.5
+    imx500_max_detections: 10
+
     ## Inference Source
     #imageDir: "../datasets/combinedData/images/val"
     #imageDir: "../datasets/testImages"

@@ -301,6 +301,7 @@ if __name__ == "__main__":
                     # Get detections from IMX500
                     metadata = picam2.capture_metadata()
                     detections = parse_detections(metadata, intrinsics, imx500, picam2, imx500_threshold, imx500_iou, imx500_max_detections)
+                    logger.info(f"IMX500 detections: {len(detections)} objects detected")
                     # Convert detections to your expected format for downstream processing
                     # For example, create a numpy array: [x, y, w, h, conf, class]
                     results = []
@@ -309,7 +310,15 @@ if __name__ == "__main__":
                         conf = det.conf
                         cls = det.category
                         results.append([x, y, x+w, y+h, conf, cls])
-                    results = np.array(results)
+                    
+                    # Ensure we have a properly formatted numpy array
+                    if len(results) > 0:
+                        results = np.array(results)
+                        logger.info(f"Converted results shape: {results.shape}, first detection: {results[0]}")
+                    else:
+                        # Create empty array with correct shape when no detections
+                        results = np.empty((0, 6))
+                        logger.info("No detections found, using empty array")
                     image_1 = picam2.capture_array()
                     camTime_1 = int((time.time() - startTime[0]) * 1000)
                     camStat[0] = True

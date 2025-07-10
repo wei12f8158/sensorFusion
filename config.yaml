@@ -15,7 +15,7 @@ training:
     dataSetDir: "../datasets"
     #dataSet: "../datasets/appleHand.yaml"
     #dataSet: "ExoGlove.v2-in-progess-25-03-06/data.yaml" #Day 2 part train I ~ 1k images
-    dataSet: "day2_partII_TopCamFullyLab/data.yaml"
+    dataSet: "day2_partII_2138Images/data.yaml"
     #dataSet: "day2_partII_2138Images/data.yaml"
     #dataSet: "coco_withHand.yaml"
     #dataSet: "../datasets/coco_7Class.yaml"

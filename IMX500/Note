@@ -1,0 +1,15 @@
+source yolo-env/bin/activate
+cd /media/wei/MIC_Data/sensorFusion
+python3 run_yolo.py
+
+
+
+python3 export_imx.py
+
+imx500-package -i weights/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx_model/packerOut.zip -o final_output
+
+deactivate
+
+python3 /media/wei/MIC_Data/sensorFusion/picamera2/examples/imx500/imx500_object_detection_demo.py \
+  --model /media/wei/MIC_Data/sensorFusion/final_output/network.rpk \
+  --labels /media/wei/MIC_Data/sensorFusion/weights/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx_model/labels.txt

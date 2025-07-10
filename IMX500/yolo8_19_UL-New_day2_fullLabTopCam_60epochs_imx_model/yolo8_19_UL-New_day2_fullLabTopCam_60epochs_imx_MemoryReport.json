@@ -1,0 +1,22 @@
+{
+  "Memory Report": {
+    "Name": "yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx",
+    "Runtime Memory Physical Size": "5.27MB",
+    "Model Memory Physical Size": "2.58MB",
+    "Reserved Memory": "1.00KB",
+    "Memory Usage": "7.85MB",
+    "Total Memory Available On Chip": "8.00MB",
+    "Memory Utilization": "99%",
+    "Fit In Chip": true,
+    "Input Persistent": false,
+    "Networks": [
+      {
+        "Hash": "yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx",
+        "Name": "yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx",
+        "Runtime Memory Physical Size": "5.27MB",
+        "Model Memory Physical Size": "2.58MB",
+        "Input Persistence Cost": "0B"
+      }
+    ]
+  }
+}

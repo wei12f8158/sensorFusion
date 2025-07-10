@@ -320,6 +320,16 @@ if __name__ == "__main__":
                         results = np.empty((0, 6))
                         logger.info("No detections found, using empty array")
                     image_1 = picam2.capture_array()
+                    # Convert color space if needed - IMX500 might return RGB, OpenCV expects BGR
+                    if len(image_1.shape) == 3 and image_1.shape[2] == 3:
+                        # Log the image shape and channel means for debugging
+                        logger.info(f"Image shape: {image_1.shape}, channel means: R={np.mean(image_1[:, :, 0]):.1f}, G={np.mean(image_1[:, :, 1]):.1f}, B={np.mean(image_1[:, :, 2]):.1f}")
+                        
+                        # If the image looks blue-tinted, it's likely RGB format
+                        if np.mean(image_1[:, :, 0]) > np.mean(image_1[:, :, 2]) * 1.2:
+                            # Convert RGB to BGR
+                            image_1 = cv2.cvtColor(image_1, cv2.COLOR_RGB2BGR)
+                            logger.info("Converted RGB to BGR for display")
                     camTime_1 = int((time.time() - startTime[0]) * 1000)
                     camStat[0] = True
                 else:

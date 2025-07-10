@@ -328,7 +328,7 @@ if __name__ == "__main__":
                     serialPort.sendString(timeMS=camTime_1, handConf=distCalc.handConf, 
                         object=distCalc.grabObject[5], objectConf=distCalc.grabObject[4], distance=distCalc.bestDist)
                     if configs['debugs']['dispResults']:
-                        exitStatus = handObjDisp.draw(image_1, distCalc, validRes, camId=1, imageFile=imageFile)
+                        exitStatus = handObjDisp.draw(image_1, distCalc, validRes, imageFile=imageFile)
                         if exitStatus == ord('q'):
                             runCam[0] = False
                 else:

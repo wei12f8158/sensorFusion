@@ -3,7 +3,7 @@ debugs:
     showInfResults: True
     dispResults: True
     tpuThreadTimeout: 0.5 #Inference timeout before restarting the thread
-    runInfer: True
+    runInfer: False
     saveImages: False
     logFile: 'log_2.txt'
     videoFile: ""

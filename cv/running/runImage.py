@@ -174,7 +174,7 @@ def handleImage(image, imgCapTime, dCalc, objDisp:display.displayHandObject, cam
 
     if configs['debugs']['dispResults']:
         # Show the image
-        exitStatus = objDisp.draw(imageCopy, dCalc, validRes, imageFile=imageFile)
+        exitStatus = objDisp.draw(imageCopy, dCalc, validRes, saveFileName=imageFile)
         #exitStatus = True
 
         if exitStatus == ord('q'):  # q = 113
@@ -328,7 +328,7 @@ if __name__ == "__main__":
                     serialPort.sendString(timeMS=camTime_1, handConf=distCalc.handConf, 
                         object=distCalc.grabObject[5], objectConf=distCalc.grabObject[4], distance=distCalc.bestDist)
                     if configs['debugs']['dispResults']:
-                        exitStatus = handObjDisp.draw(image_1, distCalc, validRes, imageFile=imageFile)
+                        exitStatus = handObjDisp.draw(image_1, distCalc, validRes, saveFileName=imageFile)
                         if exitStatus == ord('q'):
                             runCam[0] = False
                 else:

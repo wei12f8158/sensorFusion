@@ -174,7 +174,7 @@ def handleImage(image, imgCapTime, dCalc, objDisp:display.displayHandObject, cam
 
     if configs['debugs']['dispResults']:
         # Show the image
-        exitStatus = objDisp.draw(imageCopy, dCalc, validRes, camId, imageFile)
+        exitStatus = objDisp.draw(imageCopy, dCalc, validRes, imageFile=imageFile)
         #exitStatus = True
 
         if exitStatus == ord('q'):  # q = 113

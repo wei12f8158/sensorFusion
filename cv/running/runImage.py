@@ -306,17 +306,17 @@ if __name__ == "__main__":
                     # For example, create a numpy array: [x, y, w, h, conf, class]
                     results = []
                     for det in detections:
-                        x, y, w, h = det.box
-                        conf = det.conf
-                        cls = det.category
-                        results.append([x, y, x+w, y+h, conf, cls])
-                    
-                    # Ensure we have a properly formatted numpy array
+                        # Ensure det.box is a flat list/array of 4 numbers
+                        box = np.array(det.box).flatten()
+                        if box.shape[0] == 4:
+                            x, y, w, h = box
+                            conf = float(det.conf)
+                            cls = float(det.category)
+                            results.append([float(x), float(y), float(x+w), float(y+h), conf, cls])
                     if len(results) > 0:
                         results = np.array(results)
                         logger.info(f"Converted results shape: {results.shape}, first detection: {results[0]}")
                     else:
-                        # Create empty array with correct shape when no detections
                         results = np.empty((0, 6))
                         logger.info("No detections found, using empty array")
                     image_1 = picam2.capture_array()

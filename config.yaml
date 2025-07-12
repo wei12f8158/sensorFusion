@@ -105,8 +105,8 @@ runTime:
     distSettings:
         classMap: [0, 1, 0, 3, 4, 5, 6, 7, 8] #Remap the ojbects
         imagePxlPer_mm: .51 #From cv/pxDistCalc.ods
-        handThreshold: 0.50
-        objectThreshold: 0.60
+        handThreshold: 0.1
+        objectThreshold: 0.1
         nmsIouThreshold: 0.90 #only use if iou < this
         handClass: 4
 

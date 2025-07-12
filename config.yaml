@@ -93,7 +93,7 @@ runTime:
 
     nCameras: 1
     focus: 15  #inc of 5, 0-255, negitive for auto
-    camId: 0 # Set to 8 for HD Pro Webcam C920
+    camId: 8 # Set to 8 for HD Pro Webcam C920
     #camId_2: 0 # MAC webcam, laptop built in web cam
     camId_2: "rtsp://192.168.1.254:554/"    #Full image
     camRateHz: 5

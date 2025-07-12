@@ -25,25 +25,6 @@ from ConfigParser import ConfigParser
 config = ConfigParser(os.path.join(os.getcwd(), '../../config.yaml'))
 configs = config.get_config()
 
-# --- Auto-select USB camera or IMX500 ---
-import os
-
-def find_usb_camera():
-    # Check for /dev/video* devices (try first 5 indices)
-    for i in range(5):
-        if os.path.exists(f"/dev/video{i}"):
-            return i
-    return None
-
-usb_cam_index = find_usb_camera()
-if usb_cam_index is not None:
-    print(f"USB camera found at /dev/video{usb_cam_index}, using USB camera.")
-    configs['runTime']['use_imx500'] = False
-    configs['runTime']['camId'] = usb_cam_index
-else:
-    print("No USB camera found, using IMX500.")
-    configs['runTime']['use_imx500'] = True
-
 ## Logging
 import logging
 debug = configs['debugs']['debug']

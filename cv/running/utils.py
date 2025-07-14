@@ -69,16 +69,15 @@ def get_image_tensor(img, max_size, debug=False):
     if type(img) is str:
         #print(f"cv2 version: {cv2.__version__}")
         img = cv2.imread(img, cv2.IMREAD_UNCHANGED) 
-    
+    # Convert BGR to RGB if needed
+    if img is not None and len(img.shape) == 3 and img.shape[2] == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     resized, pad = resize_and_pad(img, max_size)
     resized = resized.astype(np.float32)
-    
     if debug:
         cv2.imwrite("intermediate.png", resized)
-
     # Normalise!
     resized /= 255.0
-    
     return img, resized, pad
 
 

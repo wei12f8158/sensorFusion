@@ -147,40 +147,68 @@ def handleImage(image, imgCapTime, dCalc, objDisp:display.displayHandObject, cam
     # Immediatly make a copy
     ##
     imageCopy = image.copy()
-    logger.info(f"------------------Camera {camId}---------------------------")
-    #logger.info(f"Image Capture Time: {imgCapTime}") # THisis in each cameras log
-    #logger.info(f"size: {image_1.shape}")
+    logger.info(f"================== Camera {camId} ==================")
+    logger.info(f"Image shape: {imageCopy.shape}, dtype: {imageCopy.dtype}")
+    logger.info(f"Image capture time: {imgCapTime}ms")
 
     if(configs['debugs']['runInfer']):
-        logger.info(f"Run inference on: Image size: {imageCopy.shape}")
+        logger.info(f"Starting inference on image...")
         results, imageCopy = infer.runInference(imageCopy)
-        logger.info(f"Infer done")
+        logger.info(f"Inference completed")
+        
         if isinstance(results, int): #Did we get a bad inference
             validRes = False
-            logger.error(f"!!!Inference Failed!!!!")
+            logger.error(f"!!!Inference Failed!!!! Returned: {results}")
         else:
-            validRes = dCalc.loadData(results )
-
-            # send over serial: timeMS= 0, handConf= 0, object=None, objectConf=0, distance=0
-            # Grab object from inference: 4=Confidence, 5 = class
-            serialPort.sendString(timeMS=imgCapTime, handConf=distCalc.handConf, 
-                              object=distCalc.grabObject[5], objectConf=distCalc.grabObject[4], distance=distCalc.bestDist)
+            logger.info(f"Raw detection results: {type(results)}")
+            if hasattr(results, 'shape'):
+                logger.info(f"Results shape: {results.shape}")
+            if len(results) > 0:
+                logger.info(f"Number of detections: {len(results)}")
+                logger.info(f"First detection: {results[0]}")
+                logger.info(f"Detection format: [x1, y1, x2, y2, confidence, class]")
+                for i, det in enumerate(results):
+                    logger.info(f"Detection {i}: class={int(det[5])}, conf={det[4]:.3f}, bbox=[{det[0]:.1f}, {det[1]:.1f}, {det[2]:.1f}, {det[3]:.1f}]")
+            else:
+                logger.info("No detections found in results")
+            
+            validRes = dCalc.loadData(results)
+            logger.info(f"Distance calculation result: {validRes}")
+            
+            if validRes:
+                logger.info(f"Final results - Hands: {dCalc.nHands}, Objects: {dCalc.nNonHand}")
+                logger.info(f"Best object: class={int(dCalc.grabObject[5])}, conf={dCalc.grabObject[4]:.3f}")
+                logger.info(f"Hand confidence: {dCalc.handConf:.3f}")
+                logger.info(f"Distance: {dCalc.bestDist:.1f}mm")
+                
+                # send over serial: timeMS= 0, handConf= 0, object=None, objectConf=0, distance=0
+                # Grab object from inference: 4=Confidence, 5 = class
+                serialPort.sendString(timeMS=imgCapTime, handConf=distCalc.handConf, 
+                                  object=distCalc.grabObject[5], objectConf=distCalc.grabObject[4], distance=distCalc.bestDist)
+                logger.info(f"Serial data sent: handConf={distCalc.handConf}, object={distCalc.grabObject[5]}, objectConf={distCalc.grabObject[4]:.3f}, distance={distCalc.bestDist:.1f}")
+            else:
+                logger.info("Distance calculation failed - insufficient detections")
 
         # Send the results over serial
         # make object from serialComms.py
         # $24, "CV", imgCapTime (uint_32), handConf (uint8), object class (uint8), object conf (uint8), Distance (uint16), <LF><CR>
     else: 
         validRes = False
+        logger.info("Inference disabled in config")
 
     if configs['debugs']['dispResults']:
+        logger.info("Displaying results...")
         # Show the image
         exitStatus = objDisp.draw(imageCopy, dCalc, validRes, saveFileName=imageFile)
         #exitStatus = True
 
         if exitStatus == ord('q'):  # q = 113
-            return False
             logger.info(f"********   quit now ***********")
+            return False
+    else:
+        logger.info("Display disabled in config")
         
+    logger.info(f"================== End Camera {camId} ==================")
     return True
 
 def change_log_file(logger_ptr, fileName):

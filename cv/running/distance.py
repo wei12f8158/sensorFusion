@@ -66,40 +66,51 @@ class distanceCalculator:
         self.time_ms = 0
         self.data = data
         
-        #logger.info(f"LoadData, Data: {data}")
+        logger.info(f"Processing {len(data)} raw detections")
+        logger.info(f"Hand threshold: {self.hThresh}, Object threshold: {self.oThresh}")
+        logger.info(f"Hand class number: {self.handClassNum}")
+        logger.info(f"Class mapping: {self.classMap}")
 
-        for object in data:
+        for i, object in enumerate(data):
             # E.x. if it reports a bottle, claim appleA
             objClass = int(object[classField])
+            originalClass = objClass
             if len(self.classMap) >= objClass:
                 object[classField] = self.classMap[objClass]
+                logger.info(f"Detection {i}: class {originalClass} -> {object[classField]} (mapped)")
 
-            #logger.info(f"LoadDataobject: {object}")
-            logger.info(f"LoadData, this object class: {object[classField]}, conf: {object[confField]}")
+            logger.info(f"Detection {i}: class={object[classField]}, conf={object[confField]:.3f}, bbox=[{object[0]:.1f}, {object[1]:.1f}, {object[2]:.1f}, {object[3]:.1f}]")
+            
             if object[classField] == self.handClassNum and object[confField] >= self.hThresh:
                 self.nHands += 1
+                logger.info(f"  -> Hand detected (confidence: {object[confField]:.3f})")
                 #self.hand = object
                 self.handCenter = self.findCenter(object)
                 self.handObject = object
             elif object[confField] >= self.oThresh: 
-                #logger.info(f"loadData, object: {object}")
                 self.nNonHand += 1
+                logger.info(f"  -> Object detected (confidence: {object[confField]:.3f})")
                 ## we still want to be able to display if we don't have a hand
                 # use the best confidence untill we can be bothered to show multiple objectes
                 if object[confField] > self.grabObject[confField]:
                     self.grabObject[confField] = object[confField]
                     self.grabObject = object # hmm, how to sort multiple objects if we have no hand?
                     self.bestCenter = self.findCenter(object)
+                    logger.info(f"  -> New best object (confidence: {object[confField]:.3f})")
+            else:
+                logger.info(f"  -> Below threshold (hand: {object[confField] < self.hThresh}, object: {object[confField] < self.oThresh})")
 
 
         # If we have multiple hands use the one with the highest confidence
         # Its own loop to leave room for multi gloves
         if self.nHands >= 1:
+            logger.info(f"Processing {self.nHands} hands for best confidence...")
             for object in data:
                 if object[classField] == self.handClassNum and object[confField] >= self.hThresh and object[confField] > self.handConf:
                     self.handConf = object[confField]
                     self.handCenter = self.findCenter(object)
                     self.handObject = object
+                    logger.info(f"New best hand (confidence: {object[confField]:.3f})")
 
 
         if self.nNonHand == 0 or self.nHands == 0:
@@ -107,13 +118,16 @@ class distanceCalculator:
             return False
         
         # Once we have the hand object, get the closest distance
+        logger.info("Calculating distances to find closest object...")
         for object in data:
             if object[classField] != self.handClassNum and object[confField] >= self.oThresh: 
                 thisDist = self.calcDist(object)
+                logger.info(f"Distance to object (class {object[classField]}): {thisDist:.1f}mm")
                 if thisDist < self.bestDist: 
                     self.grabObject = object
                     self.bestDist = thisDist
                     self.bestCenter = self.findCenter(object)
+                    logger.info(f"New closest object: {thisDist:.1f}mm")
 
         logger.info(f"N objects detected: hands = {self.nHands}, non hands = {self.nNonHand},  Distance = {self.bestDist:.0f}mm")
         return True

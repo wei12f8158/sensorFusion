@@ -84,7 +84,7 @@ class modelRunTime:
             x = (255*np.random.random((3,*self.input_size))).astype(np.float32)
             self.model.forward(x)
         else:
-            self.model = YOLO(modelFile)  #
+            self.model = YOLO(modelFile)  #Try this with the new model
 
     def exit(self):
         if self.device == "tpu":
@@ -155,13 +155,26 @@ class modelRunTime:
         return results
 
     def runInferenceRPiWebCam(self, image):
+        logger.info(f"Running Raspberry Pi webcam inference")
+        logger.info(f"Input image shape: {image.shape}, dtype: {image.dtype}")
+        
         from utils import get_image_tensor
-        #logger.info(f"Running Raspberry Pi webcam inference")
         full_image, net_image, pad = get_image_tensor(image, self.input_size[0])
-        #logger.info(f"Done padding")
+        logger.info(f"Preprocessed image shape: {net_image.shape}, pad: {pad}")
+        
+        logger.info("Running model forward pass...")
         pred = self.model.forward(net_image)
-        if isinstance(pred, int): return 0 # inference failed
-        #logger.info(f"Done forward path")
+        if isinstance(pred, int): 
+            logger.error(f"Inference failed, returned: {pred}")
+            return 0 # inference failed
+        
+        logger.info(f"Model output shape: {pred[0].shape if hasattr(pred[0], 'shape') else 'No shape'}")
+        logger.info(f"Model output type: {type(pred[0])}")
+        if len(pred[0]) > 0:
+            logger.info(f"Raw predictions before NMS: {len(pred[0])} detections")
+            logger.info(f"First raw prediction: {pred[0][0]}")
+        
+        logger.info("Processing predictions...")
         results = self.model.process_predictions(det=pred[0], 
                                                  output_image=full_image, 
                                                  pad=pad,
@@ -169,7 +182,15 @@ class modelRunTime:
                                                  save_txt=False,
                                                  hide_labels=True,
                                                  hide_conf=True)
+        
+        logger.info(f"Final results shape: {results.shape if hasattr(results, 'shape') else 'No shape'}")
+        if len(results) > 0:
+            logger.info(f"Final detections after NMS: {len(results)}")
+            for i, det in enumerate(results):
+                logger.info(f"Final detection {i}: {det}")
+        else:
+            logger.info("No final detections after NMS")
                         
         tinference, tnms = self.model.get_last_inference_time()
-        #logger.info("Frame done in {}".format(tinference+tnms))
+        logger.info(f"Timing - Inference: {tinference:.3f}s, NMS: {tnms:.3f}s, Total: {tinference+tnms:.3f}s")
         return results

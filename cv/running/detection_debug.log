@@ -1,0 +1,3 @@
+2025-07-15 16:46:38,671 - test_detection - INFO - === Starting Detection Test ===
+2025-07-15 16:46:38,671 - test_detection - INFO - Model path: IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
+2025-07-15 16:46:38,671 - test_detection - ERROR - Model file not found: IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt

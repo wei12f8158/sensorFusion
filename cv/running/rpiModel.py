@@ -12,15 +12,18 @@
 #
 ###
 
-import time
 import os
 import sys
+import time
+import json
+import yaml
 import logging
 import numpy as np
 import cv2
-import yaml
-import json
-from pathlib import Path
+
+# Set up logging first
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("RaspberryPiModel")
 
 # Try to import TensorFlow Lite first, fallback to ONNX Runtime
 try:
@@ -41,9 +44,6 @@ except ImportError:
 
 from nms import non_max_suppression, non_max_suppresion_v8
 from utils import plot_one_box, Colors, get_image_tensor
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("RaspberryPiModel")
 
 class RaspberryPiModel:
     def __init__(self, model_file, names_file, conf_thresh=0.25, iou_thresh=0.45, 

@@ -40,6 +40,7 @@ class modelRunTime:
 
         modelPath = Path(configs['training']['weightsDir'])
         modelFile = modelPath/weightsFile
+        print(f"Loading model from: {modelFile}")
         logger.info(f"model: {modelFile}")
 
         # Load the state dict

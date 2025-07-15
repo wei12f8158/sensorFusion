@@ -51,7 +51,7 @@ training:
     #weightsFile_tpu: "yolo11n_tran_2class_full_integer_quant_edgetpu.tflite" # Does not run on TPU
     #weightsFile_tpu: "yolo8_17_UL-Old_day2_fullLabTopCam_30epochs_full_integer_quant_edgetpu.tflite"
     #weightsFile_tpu: "yolo8_18_UL-New_day2_fullLabTopCam_120epochs_full_integer_quant_edgetpu.tflite"
-    weightsFile_tpu: "IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
+    weightsFile_tpu: "IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx_model/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx.onnx"
 
 
     transLearn: True

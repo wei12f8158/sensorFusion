@@ -346,16 +346,27 @@ class RaspberryPiModel:
         
         if with_nms:
             tstart = time.time()
-            if self.v8:
-                nms_result = non_max_suppresion_v8(result, self.conf_thresh, self.iou_thresh, 
-                                                 self.filter_classes, self.agnostic_nms, 
-                                                 max_det=self.max_det)
+            # For PyTorch models, YOLO already applies NMS, so just filter by confidence
+            if self.model_file.endswith('.pt'):
+                # Filter by confidence threshold
+                if len(result) > 0:
+                    nms_result = result[result[:, 4] >= self.conf_thresh]
+                else:
+                    nms_result = result
+                self.nms_time = time.time() - tstart
+                return nms_result
             else:
-                nms_result = non_max_suppression(result, self.conf_thresh, self.iou_thresh, 
-                                               self.filter_classes, self.agnostic_nms, 
-                                               max_det=self.max_det)
-            self.nms_time = time.time() - tstart
-            return nms_result
+                # Apply NMS for other model types
+                if self.v8:
+                    nms_result = non_max_suppresion_v8(result, self.conf_thresh, self.iou_thresh, 
+                                                     self.filter_classes, self.agnostic_nms, 
+                                                     max_det=self.max_det)
+                else:
+                    nms_result = non_max_suppression(result, self.conf_thresh, self.iou_thresh, 
+                                                   self.filter_classes, self.agnostic_nms, 
+                                                   max_det=self.max_det)
+                self.nms_time = time.time() - tstart
+                return nms_result
         else:
             return result
     

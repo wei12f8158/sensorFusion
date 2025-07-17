@@ -337,7 +337,8 @@ class RaspberryPiModel:
         # Scale output for quantized models
         result = (raw_output.astype('float32') - self.output_zero) * self.output_scale
         
-        if self.v8:
+        # Skip transpose for PyTorch models since YOLO handles this internally
+        if self.v8 and not self.model_file.endswith('.pt'):
             result = np.transpose(result, [0, 2, 1])  # transpose for yolov8 models
         
         self.inference_time = time.time() - tstart

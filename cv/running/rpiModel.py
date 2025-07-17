@@ -227,7 +227,11 @@ class RaspberryPiModel:
             
             # Get model info
             model_info = self.yolo_model.info()
-            self.input_size = (model_info['height'], model_info['width'])
+            # Default to 640x640 if info doesn't contain size
+            if isinstance(model_info, dict) and 'height' in model_info and 'width' in model_info:
+                self.input_size = (model_info['height'], model_info['width'])
+            else:
+                self.input_size = (640, 640)  # Default YOLO input size
             
             # For PyTorch models, we'll use float32 (no quantization)
             self.input_zero = 0.0

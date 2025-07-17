@@ -303,7 +303,20 @@ class RaspberryPiModel:
             raw_output = self.interpreter.get_tensor(self.output_details[0]['index']).copy()
         elif self.model_file.endswith('.pt'):
             # Use YOLO model for PyTorch
-            results = self.yolo_model(x, verbose=False)
+            # Convert numpy array to PIL Image for YOLO
+            import cv2
+            from PIL import Image
+            
+            # Convert to uint8 and transpose to HWC format
+            if x.shape[0] == 3:  # CHW format
+                x_img = x.transpose((1, 2, 0)).astype(np.uint8)
+            else:
+                x_img = x.astype(np.uint8)
+            
+            # Convert to PIL Image
+            pil_img = Image.fromarray(x_img)
+            
+            results = self.yolo_model(pil_img, verbose=False)
             # Convert to numpy array format: [x1, y1, x2, y2, conf, class]
             if len(results) > 0 and len(results[0].boxes) > 0:
                 boxes = results[0].boxes

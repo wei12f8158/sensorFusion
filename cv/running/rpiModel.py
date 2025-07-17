@@ -308,6 +308,9 @@ class RaspberryPiModel:
             from PIL import Image
             
             # Convert to uint8 and transpose to HWC format
+            if len(x.shape) == 4:  # Batch dimension
+                x = x.squeeze(0)  # Remove batch dimension
+            
             if x.shape[0] == 3:  # CHW format
                 x_img = x.transpose((1, 2, 0)).astype(np.uint8)
             else:

@@ -111,6 +111,8 @@ class RaspberryPiModel:
             self._load_tflite_model()
         elif self.model_file.endswith('.onnx'):
             self._load_onnx_model()
+        elif self.model_file.endswith('.pt'):
+            self._load_pytorch_model()
         else:
             raise ValueError(f"Unsupported model format: {self.model_file}")
     
@@ -214,6 +216,32 @@ class RaspberryPiModel:
             logger.error(f"Failed to load ONNX model: {e}")
             raise
     
+    def _load_pytorch_model(self):
+        """Load PyTorch model"""
+        try:
+            import torch
+            from ultralytics import YOLO
+            
+            # Load YOLO model
+            self.yolo_model = YOLO(self.model_file)
+            
+            # Get model info
+            model_info = self.yolo_model.info()
+            self.input_size = (model_info['height'], model_info['width'])
+            
+            # For PyTorch models, we'll use float32 (no quantization)
+            self.input_zero = 0.0
+            self.input_scale = 1.0
+            self.output_zero = 0.0
+            self.output_scale = 1.0
+            
+            logger.info("Successfully loaded PyTorch model: {}".format(self.model_file))
+            logger.info("Input size: {}".format(self.input_size))
+            
+        except Exception as e:
+            logger.error(f"Failed to load PyTorch model: {e}")
+            raise
+    
     def get_image_size(self):
         """Get the input image size required by the model"""
         return self.input_size
@@ -269,6 +297,19 @@ class RaspberryPiModel:
             self.interpreter.set_tensor(self.input_details[0]['index'], x)
             self.interpreter.invoke()
             raw_output = self.interpreter.get_tensor(self.output_details[0]['index']).copy()
+        elif self.model_file.endswith('.pt'):
+            # Use YOLO model for PyTorch
+            results = self.yolo_model(x, verbose=False)
+            # Convert to numpy array format: [x1, y1, x2, y2, conf, class]
+            if len(results) > 0 and len(results[0].boxes) > 0:
+                boxes = results[0].boxes
+                raw_output = np.column_stack([
+                    boxes.xyxy.cpu().numpy(),  # x1, y1, x2, y2
+                    boxes.conf.cpu().numpy(),  # confidence
+                    boxes.cls.cpu().numpy()    # class
+                ])
+            else:
+                raw_output = np.empty((0, 6))
         else:  # ONNX
             input_name = self.input_details[0]['name']
             raw_output = self.interpreter.run(None, {input_name: x})[0]

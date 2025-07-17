@@ -66,7 +66,8 @@ training:
 
 runTime:
     # IMX500 settings   
-    use_imx500: False
+    use_imx500: False  # Set to True to use IMX500
+    imx500_ai_camera: False  # Set to True for AI camera mode, False for camera source mode
     imx500_model: "../../IMX500/final_output/network.rpk"
     imx500_labels: "../../IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx_model/labels.txt"
     imx500_threshold: 0.5

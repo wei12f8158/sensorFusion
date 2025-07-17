@@ -47,7 +47,7 @@ def is_raspberry_pi():
     except:
         return False
 
-# Add IMX500 imports
+# Add IMX500 imports (for both camera and AI camera modes)
 from picamera2 import Picamera2
 from picamera2.devices import IMX500
 from picamera2.devices.imx500 import (NetworkIntrinsics, postprocess_nanodet_detection)
@@ -55,19 +55,29 @@ from picamera2.devices.imx500 import (NetworkIntrinsics, postprocess_nanodet_det
 # Platform detection
 if machine == "aarch64":
     if is_raspberry_pi():
-        # Check for IMX500 config
+        # Check for IMX500 config - support both modes
         if configs['runTime'].get('use_imx500', False):
-            device = "imx500"
-            logger.info("Detected Raspberry Pi 5 with IMX500")
+            # Check if we want to use IMX500 as AI camera or just camera source
+            if configs['runTime'].get('imx500_ai_camera', False):
+                device = "imx500"  # Use IMX500 for inference (AI camera mode)
+                use_imx500_camera = False
+                logger.info("Detected Raspberry Pi 5 with IMX500 as AI camera (inference on IMX500)")
+            else:
+                device = "rpi"  # Run inference on Pi 5
+                use_imx500_camera = True  # Use IMX500 as camera source
+                logger.info("Detected Raspberry Pi 5 with IMX500 as camera source (inference on Pi 5)")
         else:
             device = "rpi"
+            use_imx500_camera = False
             logger.info("Detected Raspberry Pi 5")
     else:
         device = "tpu"
+        use_imx500_camera = False
         logger.info("Detected Coral Dev Board (TPU)")
 else:
     import torch
     device = "cpu" 
+    use_imx500_camera = False
     if torch.cuda.is_available(): device = "cuda" 
     if torch.backends.mps.is_available() and torch.backends.mps.is_built(): device = "mps"
 
@@ -278,8 +288,20 @@ if __name__ == "__main__":
                                            configs['runTime']['distSettings'])
         handObjDisp_2 = display.displayHandObject(configs, camNum=2)
     
-    # Add IMX500 initialization if needed
-    if device == "imx500":
+    # Add IMX500 initialization if needed (supports both modes)
+    if use_imx500_camera:
+        # Initialize IMX500 as a camera source (not for inference)
+        picam2 = Picamera2()
+        # Use standard camera configuration for IMX500
+        config = picam2.create_preview_configuration(
+            main={"size": (1920, 1080)},  # Adjust resolution as needed
+            controls={"FrameRate": configs['runTime'].get('camRateHz', 30)},
+            buffer_count=12
+        )
+        picam2.start(config, show_preview=False)
+        logger.info("IMX500 initialized as camera source")
+    elif device == "imx500":
+        # Initialize IMX500 as AI camera (with inference)
         imx500_model = configs['runTime']['imx500_model']
         imx500_labels = configs['runTime'].get('imx500_labels', None)
         imx500_threshold = configs['runTime'].get('imx500_threshold', 0.5)
@@ -298,6 +320,7 @@ if __name__ == "__main__":
         picam2 = Picamera2(imx500.camera_num)
         config = picam2.create_preview_configuration(controls={"FrameRate": intrinsics.inference_rate}, buffer_count=12)
         picam2.start(config, show_preview=False)
+        logger.info("IMX500 initialized as AI camera with inference")
 
     ## Get image
     if configs['runTime']['imgSrc'] == 'camera':
@@ -325,8 +348,17 @@ if __name__ == "__main__":
             dataRateTime[0] = (thisTime-startTime[0])
             if(dataRateTime[0]) >= frameTime: 
                 #logger.info(f"Get next image")
-                if device == "imx500":
-                    # Get detections from IMX500
+                if use_imx500_camera:
+                    # Use IMX500 as camera source, capture image
+                    image_1 = picam2.capture_array()
+                    # Convert IMX500 image from RGB to BGR for OpenCV display
+                    if len(image_1.shape) == 3 and image_1.shape[2] == 3:
+                        image_1 = cv2.cvtColor(image_1, cv2.COLOR_RGB2BGR)
+                        logger.info("Captured image from IMX500 and converted RGB to BGR")
+                    camTime_1 = int((time.time() - startTime[0]) * 1000)
+                    camStat[0] = True
+                elif device == "imx500":
+                    # Get detections from IMX500 (AI camera mode)
                     metadata = picam2.capture_metadata()
                     detections = parse_detections(metadata, intrinsics, imx500, picam2, imx500_threshold, imx500_iou, imx500_max_detections)
                     logger.info(f"IMX500 detections: {len(detections)} objects detected")
@@ -364,7 +396,7 @@ if __name__ == "__main__":
 
             if camStat[0]:
                 if device == "imx500":
-                    # Use IMX500 results directly
+                    # Use IMX500 results directly (AI camera mode)
                     validRes = distCalc.loadData(results)
                     serialPort.sendString(timeMS=camTime_1, handConf=distCalc.handConf, 
                         object=distCalc.grabObject[5], objectConf=distCalc.grabObject[4], distance=distCalc.bestDist)
@@ -373,6 +405,7 @@ if __name__ == "__main__":
                         if exitStatus == ord('q'):
                             runCam[0] = False
                 else:
+                    # Use standard inference pipeline (runs on Pi 5)
                     runCam[0] = handleImage(image_1, camTime_1, distCalc, handObjDisp, camId=1)
                 logger.info(f"Total cam 1 time: {dataRateTime[0]*1000:.2f}ms, " \
                             f"{1/dataRateTime[0]:.1f}Hz, " \
@@ -393,13 +426,19 @@ if __name__ == "__main__":
 
             
         # Destructor
-        infer.exit() # We must exit for the TPU
+        if configs['debugs']['runInfer']:
+            infer.exit() # We must exit for the TPU
         runCam = [False, False] # Kill both cameras
         camThread_1.join() # join the thread back to main
         del inputCam_1 
         if(configs['runTime']['nCameras'] == 2):
             camThread_2.join() # join the thread back to main
             del inputCam_2 
+        
+        # Clean up IMX500 camera if used
+        if use_imx500_camera or device == "imx500":
+            picam2.stop()
+            logger.info("IMX500 camera stopped")
         
         if device == "tpu":
             runTimeCheckThread = False

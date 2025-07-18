@@ -316,10 +316,18 @@ class RaspberryPiModel:
             else:
                 x_img = x.astype(np.uint8)
             
+            logger.info(f"PyTorch input shape: {x.shape}, converted shape: {x_img.shape}")
+            logger.info(f"PyTorch input range: {x.min():.3f} to {x.max():.3f}")
+            logger.info(f"PyTorch converted range: {x_img.min()} to {x_img.max()}")
+            
             # Convert to PIL Image
             pil_img = Image.fromarray(x_img)
             
             results = self.yolo_model(pil_img, verbose=False)
+            logger.info(f"YOLO results: {len(results)}")
+            if len(results) > 0:
+                logger.info(f"YOLO boxes: {len(results[0].boxes)}")
+            
             # Convert to numpy array format: [x1, y1, x2, y2, conf, class]
             if len(results) > 0 and len(results[0].boxes) > 0:
                 boxes = results[0].boxes
@@ -328,8 +336,10 @@ class RaspberryPiModel:
                     boxes.conf.cpu().numpy(),  # confidence
                     boxes.cls.cpu().numpy()    # class
                 ])
+                logger.info(f"PyTorch raw output shape: {raw_output.shape}")
             else:
                 raw_output = np.empty((0, 6))
+                logger.info("PyTorch: No detections from YOLO model")
         else:  # ONNX
             input_name = self.input_details[0]['name']
             raw_output = self.interpreter.run(None, {input_name: x})[0]

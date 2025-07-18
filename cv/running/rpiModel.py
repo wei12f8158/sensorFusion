@@ -312,9 +312,12 @@ class RaspberryPiModel:
                 x = x.squeeze(0)  # Remove batch dimension
             
             if x.shape[0] == 3:  # CHW format
-                x_img = x.transpose((1, 2, 0)).astype(np.uint8)
+                x_img = x.transpose((1, 2, 0))
             else:
-                x_img = x.astype(np.uint8)
+                x_img = x
+            
+            # Scale from 0-1 to 0-255 and convert to uint8
+            x_img = (x_img * 255).astype(np.uint8)
             
             logger.info(f"PyTorch input shape: {x.shape}, converted shape: {x_img.shape}")
             logger.info(f"PyTorch input range: {x.min():.3f} to {x.max():.3f}")

@@ -47,11 +47,17 @@ training:
     #weightsFile: "yolo11n_tran_2class.pt"
     ## Run YOLO8 or lower
     #weightsFile_tpu: "yolov5nu_tran_hsv_h-1.0_81class_640px_full_integer_quant_edgetpu.tflite"
+    weightsFile_rpi: "/home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
     #weightsFile_tpu: "yolov8n_tran_2class_full_integer_quant_edgetpu.tflite"
+    weightsFile_rpi: "/home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
     #weightsFile_tpu: "yolo11n_tran_2class_full_integer_quant_edgetpu.tflite" # Does not run on TPU
+    weightsFile_rpi: "/home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
     #weightsFile_tpu: "yolo8_17_UL-Old_day2_fullLabTopCam_30epochs_full_integer_quant_edgetpu.tflite"
+    weightsFile_rpi: "/home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
     #weightsFile_tpu: "yolo8_18_UL-New_day2_fullLabTopCam_120epochs_full_integer_quant_edgetpu.tflite"
-    weightsFile_tpu: "IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx_model/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx.onnx"
+    weightsFile_rpi: "/home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
+    weightsFile_tpu: "IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
+    weightsFile_rpi: "/home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
 
 
     transLearn: True
@@ -66,7 +72,7 @@ training:
 
 runTime:
     # IMX500 settings   
-    use_imx500: False  # Set to True to use IMX500
+    use_imx500: True  # Set to True to use IMX500
     imx500_ai_camera: False  # Set to True for AI camera mode, False for camera source mode
     imx500_model: "../../IMX500/final_output/network.rpk"
     imx500_labels: "../../IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx_model/labels.txt"
@@ -83,7 +89,7 @@ runTime:
     imageDir: "../images_capture/day1" # On Mac
     #imageDir: "../images_capture/test_day2/cam-1_overhead/tape_spool/sub3"
     #imageDir: "/Volumes/Data/exoGlove/images_capture/test_day2/cam-1_overhead/apple/sub3"
-    #imgSrc: "appleHand_hand_4.jpg"
+    #imgSrc: "camera"
     #imgSrc: "dataset3_310.jpg"
     imgSrc: "camera"
     #imgSrc: "*_apple_*"

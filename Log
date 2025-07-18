@@ -1,0 +1,22 @@
+[0:01:28.915473651] [2195]  INFO RPI pisp.cpp:1483 Sensor: /base/axi/pcie@1000120000/rp1/i2c@88000/imx500@1a - Selected sensor format: 2028x1520-SRGGB10_1X10 - Selected CFE format: 2028x1520-PC1R
+Traceback (most recent call last):
+  File "/home/wei/sensorFusion/cv/running/runImage.py", line 409, in <module>
+    runCam[0] = handleImage(image_1, camTime_1, distCalc, handObjDisp, camId=1)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wei/sensorFusion/cv/running/runImage.py", line 166, in handleImage
+    results, imageCopy = infer.runInference(imageCopy)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wei/sensorFusion/cv/running/modelRunTime.py", line 112, in runInference
+    yoloResults = self.runInferenceRPiWebCam(image)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wei/sensorFusion/cv/running/modelRunTime.py", line 171, in runInferenceRPiWebCam
+    logger.info(f"Model output shape: {pred[0].shape if hasattr(pred[0], 'shape') else 'No shape'}")
+                                                                ~~~~^^^
+IndexError: index 0 is out of bounds for axis 0 with size 0
+^CException ignored in: <module 'threading' from '/usr/lib/python3.11/threading.py'>
+Traceback (most recent call last):
+  File "/usr/lib/python3.11/threading.py", line 1583, in _shutdown
+    lock.acquire()
+KeyboardInterrupt: 
+terminate called without an active exception
+Aborted

@@ -301,14 +301,14 @@ if __name__ == "__main__":
     if use_imx500_camera:
         # Initialize IMX500 as a camera source (not for inference)
         picam2 = Picamera2()
-        # Use standard camera configuration for IMX500
+        # Use 640x640 resolution to match YOLO model input size
         config = picam2.create_preview_configuration(
-            main={"size": (1920, 1080)},  # Adjust resolution as needed
+            main={"size": (640, 640)},  # Match YOLO model input size
             controls={"FrameRate": configs['runTime'].get('camRateHz', 30)},
             buffer_count=12
         )
         picam2.start(config, show_preview=False)
-        logger.info("IMX500 initialized as camera source")
+        logger.info("IMX500 initialized as camera source at 640x640 resolution")
     elif device == "imx500":
         # Initialize IMX500 as AI camera (with inference)
         imx500_model = configs['runTime']['imx500_model']

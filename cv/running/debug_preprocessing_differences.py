@@ -34,7 +34,7 @@ def test_ultralytics_preprocessing():
         model = YOLO(model_path)
         
         logger.info(f"Model loaded: {model_path}")
-        logger.info(f"Model input size: {model.input_size}")
+        logger.info(f"Model info: {model.info()}")
         
         # Create a test image (same as synthetic test)
         test_img = np.zeros((640, 640, 3), dtype=np.uint8)
@@ -296,6 +296,115 @@ def test_with_imx500_preprocessing():
         traceback.print_exc()
         return False
 
+def test_with_real_image():
+    """Test with a real image to see if synthetic image is the issue"""
+    logger.info("=== TESTING WITH REAL IMAGE ===")
+    
+    try:
+        # Load configuration
+        config = ConfigParser(os.path.join(os.getcwd(), '../../config.yaml'))
+        configs = config.get_config()
+        
+        model_path = configs['training']['weightsFile_rpi']
+        
+        # Load model
+        from rpiModel import RaspberryPiModel
+        
+        thresh = min(configs['runTime']['distSettings']['handThreshold'],
+                    configs['runTime']['distSettings']['objectThreshold'])
+        
+        model = RaspberryPiModel(
+            model_file=model_path,
+            names_file="../../cv/datasets/day2_partII_2138Images/data.yaml",
+            conf_thresh=thresh,
+            iou_thresh=configs['runTime']['distSettings']['nmsIouThreshold'],
+            v8=True,
+            use_gpu=False,
+            num_threads=4
+        )
+        
+        logger.info("✓ Model loaded")
+        
+        # Try to find a real test image
+        test_image_paths = [
+            "../../cv/datasets/testImages/appleHand_hand_4.jpg",
+            "../../cv/datasets/testImages/appleHand_4.jpg",
+            "../../cv/datasets/day2_partII_2138Images/train/images/",
+            "../../cv/datasets/day2_partII_2138Images/valid/images/"
+        ]
+        
+        test_img = None
+        test_path = None
+        
+        for path in test_image_paths:
+            if os.path.exists(path):
+                if os.path.isdir(path):
+                    # Find first image in directory
+                    import glob
+                    images = glob.glob(os.path.join(path, "*.jpg")) + glob.glob(os.path.join(path, "*.png"))
+                    if images:
+                        test_path = images[0]
+                        test_img = cv2.imread(test_path)
+                        break
+                else:
+                    test_path = path
+                    test_img = cv2.imread(test_path)
+                    break
+        
+        if test_img is None:
+            logger.warning("No real test image found, creating a more realistic synthetic image")
+            # Create a more realistic synthetic image
+            test_img = np.ones((640, 640, 3), dtype=np.uint8) * 128  # Gray background
+            # Add some realistic objects
+            cv2.rectangle(test_img, (200, 200), (400, 400), (0, 255, 0), -1)  # Large green rectangle
+            cv2.circle(test_img, (320, 320), 50, (255, 0, 0), -1)  # Blue circle
+            test_path = "realistic_synthetic.jpg"
+            cv2.imwrite(test_path, test_img)
+        else:
+            logger.info(f"Using real test image: {test_path}")
+            cv2.imwrite("real_test_input.jpg", test_img)
+        
+        # Test with our preprocessing
+        from utils import get_image_tensor
+        full_image, net_image, pad = get_image_tensor(test_img, model.input_size[0])
+        
+        logger.info(f"Real image preprocessing - Input shape: {test_img.shape}")
+        logger.info(f"Real image preprocessing - Output shape: {net_image.shape}")
+        
+        # Run inference
+        model.conf_thresh = 0.001
+        pred = model.forward(net_image, with_nms=True)
+        
+        logger.info(f"Real image results: {len(pred)} detections")
+        if len(pred) > 0:
+            logger.info("🎉 SUCCESS! Real image works!")
+            for i, det in enumerate(pred):
+                logger.info(f"  Detection {i}: class={int(det[5])}, conf={det[4]:.3f}")
+        else:
+            logger.info("  No detections with real image")
+            
+            # Try with ultralytics directly
+            logger.info("Trying with ultralytics directly...")
+            from ultralytics import YOLO
+            ultralytics_model = YOLO(model_path)
+            results = ultralytics_model(test_img, conf=0.001, iou=0.9, verbose=False)
+            
+            if len(results) > 0:
+                result = results[0]
+                logger.info(f"Ultralytics with real image: {len(result.boxes)} detections")
+                for i, box in enumerate(result.boxes):
+                    logger.info(f"  Detection {i}: class={int(box.cls)}, conf={float(box.conf):.3f}")
+            else:
+                logger.info("  No detections with ultralytics either")
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Real image test failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 def main():
     """Main debug function"""
     logger.info("Starting comprehensive preprocessing debug...")
@@ -331,12 +440,23 @@ def main():
     imx500_test_success = test_with_imx500_preprocessing()
     
     print("\n" + "="*60)
+    print("IMX500 PREPROCESSING TEST COMPLETED")
+    print("="*60)
+    
+    # Test 5: Test with real image
+    real_image_success = test_with_real_image()
+    
+    print("\n" + "="*60)
+    print("REAL IMAGE TEST COMPLETED")
+    print("="*60)
+    
+    print("\n" + "="*60)
     print("FINAL SUMMARY")
     print("="*60)
     
-    if imx500_test_success:
+    if real_image_success:
         print("✓ All tests completed")
-        print("Check the results above to see if IMX500 preprocessing fixed the issue")
+        print("Check the results above to see what's working and what's not")
     else:
         print("✗ Some tests failed")
 

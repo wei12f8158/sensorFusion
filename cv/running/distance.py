@@ -93,8 +93,10 @@ class distanceCalculator:
                 ## we still want to be able to display if we don't have a hand
                 # use the best confidence untill we can be bothered to show multiple objectes
                 if object[confField] > self.grabObject[confField]:
-                    self.grabObject[confField] = object[confField]
-                    self.grabObject = object # hmm, how to sort multiple objects if we have no hand?
+                    # Convert numpy values to float for PyTorch tensor
+                    self.grabObject[confField] = float(object[confField])
+                    # Convert the entire object to a PyTorch tensor
+                    self.grabObject = torch.tensor([float(x) for x in object])
                     self.bestCenter = self.findCenter(object)
                     logger.info(f"  -> New best object (confidence: {object[confField]:.3f})")
             else:
@@ -124,7 +126,8 @@ class distanceCalculator:
                 thisDist = self.calcDist(object)
                 logger.info(f"Distance to object (class {object[classField]}): {thisDist:.1f}mm")
                 if thisDist < self.bestDist: 
-                    self.grabObject = object
+                    # Convert the entire object to a PyTorch tensor
+                    self.grabObject = torch.tensor([float(x) for x in object])
                     self.bestDist = thisDist
                     self.bestCenter = self.findCenter(object)
                     logger.info(f"New closest object: {thisDist:.1f}mm")
@@ -186,9 +189,18 @@ class distanceCalculator:
         return center_x, center_y
     
     def getXY(self, object):
-        x1 = object[0].item()
-        y1 = object[1].item()
-        x2 = object[2].item()
-        y2 = object[3].item()
+        # Handle both numpy arrays and PyTorch tensors
+        if hasattr(object[0], 'item'):
+            # PyTorch tensor
+            x1 = object[0].item()
+            y1 = object[1].item()
+            x2 = object[2].item()
+            y2 = object[3].item()
+        else:
+            # Numpy array
+            x1 = float(object[0])
+            y1 = float(object[1])
+            x2 = float(object[2])
+            y2 = float(object[3])
 
         return x1, y1, x2, y2

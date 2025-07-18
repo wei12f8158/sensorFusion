@@ -350,9 +350,12 @@ class RaspberryPiModel:
             if self.model_file.endswith('.pt'):
                 # Filter by confidence threshold
                 if len(result) > 0:
+                    # Use the current confidence threshold (which might have been changed)
                     nms_result = result[result[:, 4] >= self.conf_thresh]
+                    logger.info(f"PyTorch model: {len(result)} raw detections, {len(nms_result)} after confidence filtering (threshold={self.conf_thresh})")
                 else:
                     nms_result = result
+                    logger.info(f"PyTorch model: No raw detections")
                 self.nms_time = time.time() - tstart
                 return nms_result
             else:

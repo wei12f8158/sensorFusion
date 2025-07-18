@@ -1,3 +1,6 @@
+./switch_camera_mode.sh
+
+
 wei@raspberrypi:~/sensorFusion/cv/running $ python3 runImage.py
 Cam settings
 Stream Started

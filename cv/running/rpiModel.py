@@ -326,10 +326,19 @@ class RaspberryPiModel:
             # Convert to PIL Image
             pil_img = Image.fromarray(x_img)
             
+            # Debug: Check PIL image
+            logger.info(f"PIL image mode: {pil_img.mode}, size: {pil_img.size}")
+            
             results = self.yolo_model(pil_img, verbose=False)
             logger.info(f"YOLO results: {len(results)}")
             if len(results) > 0:
                 logger.info(f"YOLO boxes: {len(results[0].boxes)}")
+                if len(results[0].boxes) > 0:
+                    logger.info(f"First box: xyxy={results[0].boxes.xyxy[0]}, conf={results[0].boxes.conf[0]}, cls={results[0].boxes.cls[0]}")
+                else:
+                    logger.info("YOLO returned results but no boxes found")
+            else:
+                logger.info("YOLO returned no results")
             
             # Convert to numpy array format: [x1, y1, x2, y2, conf, class]
             if len(results) > 0 and len(results[0].boxes) > 0:

@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# Test script with very low confidence thresholds
+echo "Testing with very low confidence thresholds..."
+
+# Change to the running directory
+cd /home/wei/sensorFusion/cv/running
+
+# Create a temporary config with very low thresholds
+echo "Creating temporary config with low thresholds..."
+
+# Backup original config
+cp ../../config.yaml ../../config.yaml.backup
+
+# Create a test config with very low thresholds
+cat > ../../config_test_low.yaml << 'EOF'
+debugs:
+    debug: True 
+    showInfResults: True
+    dispResults: True
+    tpuThreadTimeout: 0.5
+    runInfer: True
+    saveImages: False
+    logFile: 'log_low_threshold.txt'
+    videoFile: ""
+
+training:
+    dataSetDir: "../datasets"
+    dataSet: "day2_partII_2138Images/data.yaml"
+    modelsDir: "../models"
+    weightsDir: ""
+    modelFile: "yolo11n.yaml"
+    weightsForTransfer: "yolo11n.pt"
+    weightsFile: "IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
+    weightsFile_rpi: "/home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
+    weightsFile_tpu: "IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt"
+    transLearn: True
+    freezeLayer: 11
+    imageSize: [480, 640]
+    epochs: 30
+
+runTime:
+    use_imx500: True
+    imx500_ai_camera: False
+    imx500_model: "../../IMX500/final_output/network.rpk"
+    imx500_labels: "../../IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx_model/labels.txt"
+    imx500_threshold: 0.01  # Very low threshold
+    imx500_iou: 0.5
+    imx500_max_detections: 10
+
+    imageDir: "../images_capture/day1"
+    imgSrc: "camera"
+    nCameras: 1
+    focus: 15
+    camId: 0
+    camId_2: "rtsp://192.168.1.254:554/"
+    camRateHz: 5
+
+    rpi_use_gpu: False
+    rpi_num_threads: 4
+
+    distSettings:
+        classMap: [0, 1, 0, 3, 4, 5, 6, 7, 8]
+        imagePxlPer_mm: .51
+        handThreshold: 0.01  # Very low threshold
+        objectThreshold: 0.01  # Very low threshold
+        nmsIouThreshold: 0.90
+        handClass: 4
+
+    displaySettings:
+        fullScreen: False
+        handLineTh: 2
+        objLineTh: 2
+        distLineTh: 2
+        runCamOnce: False
+
+timeSync:
+    gpio_chip: 4
+    gpio_pin : 13
+
+servos:
+    i2c:
+        port: "/dev/i2c-1"
+        device: 0x40
+        clock_MHz: 26.4
+
+    servos: 
+        pwm_Hz: 50
+        leavRunning: False
+
+comms:
+    port: "None"
+    speed: 115200
+    dataBits: 8
+    stobBits: 1
+    parity: 'N'
+    id: "CV"
+EOF
+
+# Run the debug script first
+echo "Running debug script..."
+python3 debug_detection.py
+
+echo ""
+echo "Now testing with very low thresholds..."
+echo "Press Ctrl+C to stop after a few seconds"
+
+# Run the application with the test config
+PYTHONPATH=/home/wei/sensorFusion/cv/running:$PYTHONPATH python3 runImage.py
+
+# Restore original config
+echo "Restoring original config..."
+mv ../../config.yaml.backup ../../config.yaml
+
+echo "Test completed. Check log_low_threshold.txt for results." 

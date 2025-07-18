@@ -178,6 +178,7 @@ class modelRunTime:
         
         logger.info("Running model forward pass...")
         pred = self.model.forward(net_image)
+        logger.info(f"Model forward returned: {type(pred)}, value: {pred}")
         if isinstance(pred, int): 
             logger.error(f"Inference failed, returned: {pred}")
             return 0 # inference failed
@@ -195,13 +196,15 @@ class modelRunTime:
         else:
             # pred might be a list or other type
             logger.info(f"Model output type: {type(pred)}")
-            if isinstance(pred, list) and len(pred) > 0:
-                logger.info(f"Model output shape: {pred[0].shape if hasattr(pred[0], 'shape') else 'No shape'}")
+            if isinstance(pred, list) and len(pred) > 0 and hasattr(pred[0], 'shape'):
+                logger.info(f"Model output shape: {pred[0].shape}")
                 if len(pred[0]) > 0:
                     logger.info(f"Raw predictions: {len(pred[0])} detections")
                     logger.info(f"First raw prediction: {pred[0][0]}")
+                else:
+                    logger.info("No raw predictions in list")
             else:
-                logger.info("No predictions found")
+                logger.info("No predictions found or invalid format")
         
         logger.info("Processing predictions...")
         # Handle different prediction formats

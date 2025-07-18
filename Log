@@ -1,18 +1,25 @@
-[0:01:28.915473651] [2195]  INFO RPI pisp.cpp:1483 Sensor: /base/axi/pcie@1000120000/rp1/i2c@88000/imx500@1a - Selected sensor format: 2028x1520-SRGGB10_1X10 - Selected CFE format: 2028x1520-PC1R
+wei@raspberrypi:~/sensorFusion/cv/running $ python3 runImage.py
+Cam settings
+Stream Started
+Loading model from: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
+YOLOv8n summary: 129 layers, 3,012,603 parameters, 0 gradients, 8.2 GFLOPs
+self.input_size: <class 'tuple'>, (640, 640)
+[3:48:29.712788886] [83464]  INFO Camera camera_manager.cpp:326 libcamera v0.5.0+59-d83ff0a4
+[3:48:29.721842865] [83538]  INFO RPI pisp.cpp:720 libpisp version v1.2.1 981977ff21f3 29-04-2025 (14:13:50)
+[3:48:29.733397385] [83538]  INFO RPI pisp.cpp:1179 Registered camera /base/axi/pcie@1000120000/rp1/i2c@88000/imx500@1a to CFE device /dev/media3 and ISP device /dev/media0 using PiSP variant BCM2712_C0
+[3:48:29.741582195] [83464]  INFO Camera camera.cpp:1205 configuring streams: (0) 640x640-XBGR8888 (1) 2028x1520-RGGB_PISP_COMP1
+[3:48:29.742178548] [83538]  INFO RPI pisp.cpp:1483 Sensor: /base/axi/pcie@1000120000/rp1/i2c@88000/imx500@1a - Selected sensor format: 2028x1520-SRGGB10_1X10 - Selected CFE format: 2028x1520-PC1R
 Traceback (most recent call last):
-  File "/home/wei/sensorFusion/cv/running/runImage.py", line 409, in <module>
+  File "/home/wei/sensorFusion/cv/running/runImage.py", line 418, in <module>
     runCam[0] = handleImage(image_1, camTime_1, distCalc, handObjDisp, camId=1)
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/wei/sensorFusion/cv/running/runImage.py", line 166, in handleImage
-    results, imageCopy = infer.runInference(imageCopy)
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/wei/sensorFusion/cv/running/modelRunTime.py", line 112, in runInference
-    yoloResults = self.runInferenceRPiWebCam(image)
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/wei/sensorFusion/cv/running/modelRunTime.py", line 171, in runInferenceRPiWebCam
-    logger.info(f"Model output shape: {pred[0].shape if hasattr(pred[0], 'shape') else 'No shape'}")
-                                                                ~~~~^^^
-IndexError: index 0 is out of bounds for axis 0 with size 0
+  File "/home/wei/sensorFusion/cv/running/runImage.py", line 185, in handleImage
+    validRes = dCalc.loadData(results)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wei/sensorFusion/cv/running/distance.py", line 96, in loadData
+    self.grabObject[confField] = object[confField]
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^
+TypeError: can't assign a numpy.float32 to a torch.FloatTensor
 ^CException ignored in: <module 'threading' from '/usr/lib/python3.11/threading.py'>
 Traceback (most recent call last):
   File "/usr/lib/python3.11/threading.py", line 1583, in _shutdown

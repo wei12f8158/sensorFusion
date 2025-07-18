@@ -230,15 +230,19 @@ def test_camera_to_model_pipeline():
             image = picam2.capture_array()
             logger.info(f"Captured image shape: {image.shape}")
             
-            # Convert to BGR
+            # Convert to BGR for OpenCV processing
             if len(image.shape) == 3 and image.shape[2] == 3:
                 image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                 cv2.imwrite(f"camera_frame_{frame_num+1}.jpg", image_bgr)
                 logger.info(f"Saved camera frame: camera_frame_{frame_num+1}.jpg")
+                # Use BGR image for inference (OpenCV format)
+                image_for_inference = image_bgr
+            else:
+                image_for_inference = image
             
             # Run inference
             from utils import get_image_tensor
-            full_image, net_image, pad = get_image_tensor(image, model.input_size[0])
+            full_image, net_image, pad = get_image_tensor(image_for_inference, model.input_size[0])
             
             logger.info(f"Preprocessed shape: {net_image.shape}")
             

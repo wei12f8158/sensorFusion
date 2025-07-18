@@ -329,7 +329,9 @@ class RaspberryPiModel:
             # Debug: Check PIL image
             logger.info(f"PIL image mode: {pil_img.mode}, size: {pil_img.size}")
             
-            results = self.yolo_model(pil_img, verbose=False)
+            # Use our confidence threshold for YOLO call
+            logger.info(f"Calling YOLO with conf={self.conf_thresh}, iou={self.iou_thresh}")
+            results = self.yolo_model(pil_img, conf=self.conf_thresh, iou=self.iou_thresh, verbose=False)
             logger.info(f"YOLO results: {len(results)}")
             if len(results) > 0:
                 logger.info(f"YOLO boxes: {len(results[0].boxes)}")

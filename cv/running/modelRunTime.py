@@ -35,6 +35,12 @@ class modelRunTime:
             import numpy as np
             # Use TFLite or ONNX model for Raspberry Pi
             weightsFile = configs['training'].get('weightsFile_rpi', configs['training']['weightsFile_tpu'])
+        elif device == "imx500":
+            # IMX500 AI camera mode - no model loading needed
+            logger.info("IMX500 AI camera mode - inference handled by IMX500")
+            self.model = None
+            self.input_size = (640, 640)  # Default size for IMX500
+            return
         else:
             from ultralytics import YOLO
             weightsFile = configs['training']['weightsFile']
@@ -91,6 +97,9 @@ class modelRunTime:
         if self.device == "tpu":
             print("exit inference")
             self.model.exit()
+        elif self.device == "imx500":
+            print("exit IMX500 inference")
+            # No cleanup needed for IMX500 AI camera mode
         
 
     def runInference(self, image):
@@ -115,6 +124,10 @@ class modelRunTime:
             #inference time, nms time
             logger.info(f"Raspberry Pi Inference, nms time: {self.model.get_last_inference_time()}") 
             return yoloResults, image
+        elif self.device == 'imx500':
+            # IMX500 AI camera mode - inference is handled by IMX500, not here
+            logger.warning("IMX500 AI camera mode: inference should be handled by IMX500, not modelRunTime")
+            return np.empty((0, 6)), image  # Return empty results
         else:
             yoloResults = self.model.predict(image) # Returns a dict
             #logger.info(yoloResults[0].speed)

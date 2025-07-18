@@ -275,8 +275,17 @@ if __name__ == "__main__":
             
 
     ## set the model information
-    if(configs['debugs']['runInfer']):
+    if(configs['debugs']['runInfer'] and device != "imx500"):
+        # Skip model initialization for IMX500 AI camera mode
         infer = modelRunTime(configs, device)
+    elif device == "imx500":
+        # For IMX500 AI camera mode, create a dummy infer object
+        class DummyInfer:
+            def __init__(self):
+                pass
+            def exit(self):
+                pass
+        infer = DummyInfer()
     
     distCalc = distance.distanceCalculator(configs['training']['imageSize'], 
                                            configs['runTime']['distSettings'])

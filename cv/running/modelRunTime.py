@@ -13,6 +13,7 @@
 #
 ###
 from pathlib import Path
+import numpy as np
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -168,14 +169,40 @@ class modelRunTime:
             logger.error(f"Inference failed, returned: {pred}")
             return 0 # inference failed
         
-        logger.info(f"Model output shape: {pred[0].shape if hasattr(pred[0], 'shape') else 'No shape'}")
-        logger.info(f"Model output type: {type(pred[0])}")
-        if len(pred[0]) > 0:
-            logger.info(f"Raw predictions before NMS: {len(pred[0])} detections")
-            logger.info(f"First raw prediction: {pred[0][0]}")
+        # Handle the case where pred might be empty or not a list
+        if hasattr(pred, 'shape'):
+            # pred is a numpy array
+            logger.info(f"Model output shape: {pred.shape}")
+            logger.info(f"Model output type: {type(pred)}")
+            if len(pred) > 0:
+                logger.info(f"Raw predictions: {len(pred)} detections")
+                logger.info(f"First raw prediction: {pred[0]}")
+            else:
+                logger.info("No raw predictions found")
+        else:
+            # pred might be a list or other type
+            logger.info(f"Model output type: {type(pred)}")
+            if isinstance(pred, list) and len(pred) > 0:
+                logger.info(f"Model output shape: {pred[0].shape if hasattr(pred[0], 'shape') else 'No shape'}")
+                if len(pred[0]) > 0:
+                    logger.info(f"Raw predictions: {len(pred[0])} detections")
+                    logger.info(f"First raw prediction: {pred[0][0]}")
+            else:
+                logger.info("No predictions found")
         
         logger.info("Processing predictions...")
-        results = self.model.process_predictions(det=pred[0], 
+        # Handle different prediction formats
+        if hasattr(pred, 'shape'):
+            # pred is a numpy array
+            det = pred
+        elif isinstance(pred, list) and len(pred) > 0:
+            # pred is a list, take first element
+            det = pred[0]
+        else:
+            # Empty or invalid prediction
+            det = np.empty((0, 6))
+        
+        results = self.model.process_predictions(det=det, 
                                                  output_image=full_image, 
                                                  pad=pad,
                                                  save_img=False,

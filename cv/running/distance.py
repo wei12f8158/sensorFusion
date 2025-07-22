@@ -129,6 +129,7 @@ class distanceCalculator:
                     # Convert the entire object to a PyTorch tensor
                     self.grabObject = torch.tensor([float(x) for x in object])
                     self.bestDist = thisDist
+                    # FIX: Use direct object center instead of distance-based center for better localization
                     self.bestCenter = self.findCenter(object)
                     logger.info(f"New closest object: {thisDist:.1f}mm")
 

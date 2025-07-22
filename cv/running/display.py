@@ -130,7 +130,12 @@ class displayHandObject:
         #logger.info(f"drawObject: {dist.grabObject}")
         objUL, objLR = dist.getBox(dist.grabObject)
         cv2.rectangle(img=thisImg, pt1=objUL, pt2=objLR, color=targetColor, thickness=self.objLineTh)
-        cv2.circle(img=thisImg, center=dist.bestCenter, radius=5, color=targetColor, thickness=2) #BGR
+        
+        # FIX: Calculate center directly like hand detection for better localization
+        x1, y1, x2, y2 = dist.getXY(dist.grabObject)
+        direct_center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
+        cv2.circle(img=thisImg, center=direct_center, radius=5, color=targetColor, thickness=2) #BGR
+        
         #cv2.putText(img=thisImg, text=objText, org=objUL, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1, color=self.objectColor)
         self.putTextInBox(img=thisImg, text=objText, org=objUL, fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=1, text_color=targetColor, box_color=[255, 255, 255])
 

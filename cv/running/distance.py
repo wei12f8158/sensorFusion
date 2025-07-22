@@ -121,17 +121,33 @@ class distanceCalculator:
         
         # Once we have the hand object, get the closest distance
         logger.info("Calculating distances to find closest object...")
+        
+        # FIX: Prioritize plate class (class 6) over distance
+        plate_found = False
         for object in data:
             if object[classField] != self.handClassNum and object[confField] >= self.oThresh: 
-                thisDist = self.calcDist(object)
-                logger.info(f"Distance to object (class {object[classField]}): {thisDist:.1f}mm")
-                if thisDist < self.bestDist: 
-                    # Convert the entire object to a PyTorch tensor
+                # If this is a plate (class 6), prioritize it
+                if object[classField] == 6:  # Plate class
+                    logger.info(f"Found plate (class 6) with confidence {object[confField]:.3f}")
                     self.grabObject = torch.tensor([float(x) for x in object])
-                    self.bestDist = thisDist
-                    # FIX: Use direct object center instead of distance-based center for better localization
+                    self.bestDist = self.calcDist(object)
                     self.bestCenter = self.findCenter(object)
-                    logger.info(f"New closest object: {thisDist:.1f}mm")
+                    plate_found = True
+                    logger.info(f"Selected plate as target object")
+                    break
+        
+        # If no plate found, fall back to closest object
+        if not plate_found:
+            for object in data:
+                if object[classField] != self.handClassNum and object[confField] >= self.oThresh: 
+                    thisDist = self.calcDist(object)
+                    logger.info(f"Distance to object (class {object[classField]}): {thisDist:.1f}mm")
+                    if thisDist < self.bestDist: 
+                        # Convert the entire object to a PyTorch tensor
+                        self.grabObject = torch.tensor([float(x) for x in object])
+                        self.bestDist = thisDist
+                        self.bestCenter = self.findCenter(object)
+                        logger.info(f"New closest object: {thisDist:.1f}mm")
 
         logger.info(f"N objects detected: hands = {self.nHands}, non hands = {self.nNonHand},  Distance = {self.bestDist:.0f}mm")
         return True

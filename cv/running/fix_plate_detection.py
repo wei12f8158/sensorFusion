@@ -35,7 +35,19 @@ def fix_plate_detection():
         logger.info("Initializing components...")
         
         # Initialize components
-        model_runtime = modelRunTime(configs)
+        # Determine device like main application
+        import platform
+        machine = platform.machine()
+        
+        if machine == "aarch64":
+            device = "rpi"
+        else:
+            import torch
+            device = "cpu" 
+            if torch.cuda.is_available(): device = "cuda" 
+            if torch.backends.mps.is_available() and torch.backends.mps.is_built(): device = "mps"
+        
+        model_runtime = modelRunTime(configs, device)
         distance_calc = distanceCalculator(configs['training']['imageSize'], configs)
         display_obj = displayHandObject(configs)
         

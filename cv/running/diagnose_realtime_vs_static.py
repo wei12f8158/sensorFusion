@@ -40,10 +40,27 @@ def capture_and_analyze_frame():
         logger.info(f"Use IMX500: {use_imx500}")
         
         if img_src == "camera" and not use_imx500:
-            # USB camera
-            cap = cv2.VideoCapture(0)
-            if not cap.isOpened():
-                logger.error("Failed to open USB camera")
+            # USB camera - try different indices
+            camera_indices = [0, 2, 3, 8]  # Based on test results
+            cap = None
+            
+            for cam_id in camera_indices:
+                logger.info(f"Trying USB camera index {cam_id}...")
+                cap = cv2.VideoCapture(cam_id)
+                if cap.isOpened():
+                    ret, test_frame = cap.read()
+                    if ret and test_frame is not None:
+                        logger.info(f"USB camera index {cam_id} works!")
+                        break
+                    else:
+                        cap.release()
+                        cap = None
+                else:
+                    cap.release()
+                    cap = None
+            
+            if cap is None:
+                logger.error("Failed to open any USB camera")
                 return False
             logger.info("USB camera opened successfully")
         else:

@@ -40,20 +40,35 @@ def capture_and_analyze_frame():
         logger.info(f"Use IMX500: {use_imx500}")
         
         if img_src == "camera" and not use_imx500:
-            cap = cv2.VideoCapture(0)  # USB camera
+            # USB camera
+            cap = cv2.VideoCapture(0)
+            if not cap.isOpened():
+                logger.error("Failed to open USB camera")
+                return False
+            logger.info("USB camera opened successfully")
         else:
             # IMX500 camera
-            from picamera2 import Picamera2
-            picam2 = Picamera2()
-            picam2.configure(picam2.create_preview_configuration(main={"size": (image_size[0], image_size[1])}))
-            picam2.start()
-            cap = picam2
+            try:
+                from picamera2 import Picamera2
+                picam2 = Picamera2()
+                picam2.configure(picam2.create_preview_configuration(main={"size": (image_size[0], image_size[1])}))
+                picam2.start()
+                cap = picam2
+                logger.info("IMX500 camera opened successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize IMX500 camera: {e}")
+                return False
         
         # Capture frame
         logger.info("Capturing frame from camera...")
-        ret, frame = cap.read()
-        if not ret:
-            logger.error("Failed to capture frame")
+        try:
+            ret, frame = cap.read()
+            if not ret or frame is None:
+                logger.error("Failed to capture frame")
+                return False
+            logger.info(f"Frame captured successfully: {frame.shape}")
+        except Exception as e:
+            logger.error(f"Error capturing frame: {e}")
             return False
         
         logger.info(f"Captured frame shape: {frame.shape}")

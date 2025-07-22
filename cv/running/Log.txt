@@ -1,12 +1,39 @@
 ./switch_camera_mode.sh
+python3 runImage.py
 
-
-wei@raspberrypi:~/sensorFusion/cv/running $ python3 diagnose_realtime_vs_static.py
-2025-07-21 17:01:34,707 - INFO - === DIAGNOSE REAL-TIME VS STATIC ===
-2025-07-21 17:01:34,716 - INFO - Model path: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
-2025-07-21 17:01:34,716 - INFO - Expected image size: [480, 640]
-2025-07-21 17:01:34,716 - INFO - Image source: camera
-2025-07-21 17:01:34,716 - INFO - Use IMX500: False
-2025-07-21 17:01:34,717 - INFO - Capturing frame from camera...
-2025-07-21 17:01:34,717 - ERROR - Failed to capture frame
-
+wei@raspberrypi:~/sensorFusion/cv/running $ python3 test_camera_access.py 
+2025-07-21 17:05:17,112 - INFO - === CAMERA ACCESS TEST ===
+2025-07-21 17:05:17,112 - INFO - Testing USB camera...
+2025-07-21 17:05:17,113 - INFO - USB camera (index 0) is available
+2025-07-21 17:05:17,113 - ERROR - USB camera opened but failed to capture frame
+2025-07-21 17:05:17,114 - INFO - Testing IMX500 camera...
+[2:20:33.643602255] [421488]  INFO Camera camera_manager.cpp:326 libcamera v0.5.0+59-d83ff0a4
+[2:20:33.651720890] [421491]  INFO RPI pisp.cpp:720 libpisp version v1.2.1 981977ff21f3 29-04-2025 (14:13:50)
+[2:20:33.661057671] [421491]  INFO RPI pisp.cpp:1179 Registered camera /base/axi/pcie@1000120000/rp1/i2c@88000/imx500@1a to CFE device /dev/media2 and ISP device /dev/media0 using PiSP variant BCM2712_C0
+2025-07-21 17:05:17,517 - INFO - Initialization successful.
+2025-07-21 17:05:17,518 - INFO - Camera now open.
+2025-07-21 17:05:17,519 - INFO - Camera configuration has been adjusted!
+[2:20:33.664659750] [421488]  INFO Camera camera.cpp:1205 configuring streams: (0) 480x640-XBGR8888 (1) 2028x1520-RGGB_PISP_COMP1
+[2:20:33.664754281] [421491]  INFO RPI pisp.cpp:1483 Sensor: /base/axi/pcie@1000120000/rp1/i2c@88000/imx500@1a - Selected sensor format: 2028x1520-SRGGB10_1X10 - Selected CFE format: 2028x1520-PC1R
+2025-07-21 17:05:17,520 - INFO - Configuration successful!
+2025-07-21 17:05:18,032 - INFO - Camera started
+2025-07-21 17:05:18,032 - INFO - IMX500 camera is available
+2025-07-21 17:05:18,356 - INFO - IMX500 camera frame shape: (640, 480, 4)
+2025-07-21 17:05:18,359 - INFO - Saved IMX500 camera test image: imx500_camera_test.jpg
+2025-07-21 17:05:18,415 - INFO - Camera stopped
+2025-07-21 17:05:18,616 - INFO - Camera closed successfully.
+2025-07-21 17:05:18,617 - INFO - Testing USB camera index 1...
+[ WARN:0@1.521] global cap_v4l.cpp:914 open VIDEOIO(V4L2:/dev/video1): can't open camera by index
+[ WARN:0@1.522] global obsensor_stream_channel_v4l2.cpp:82 xioctl ioctl: fd=4, req=-2140645888
+[ WARN:0@1.522] global obsensor_stream_channel_v4l2.cpp:138 queryUvcDeviceInfoList ioctl error return: 25
+[ WARN:0@1.522] global obsensor_stream_channel_v4l2.cpp:82 xioctl ioctl: fd=4, req=-2140645888
+[ WARN:0@1.522] global obsensor_stream_channel_v4l2.cpp:138 queryUvcDeviceInfoList ioctl error return: 25
+[ WARN:0@1.522] global obsensor_stream_channel_v4l2.cpp:82 xioctl ioctl: fd=4, req=-2140645888
+[ WARN:0@1.522] global obsensor_stream_channel_v4l2.cpp:138 queryUvcDeviceInfoList ioctl error return: 25
+[ERROR:0@1.523] global obsensor_uvc_stream_channel.cpp:163 getStreamChannelGroup Camera index out of range
+2025-07-21 17:05:18,618 - INFO - USB camera (index 1) is not available
+2025-07-21 17:05:18,619 - INFO - Testing USB camera index 2...
+2025-07-21 17:05:18,620 - INFO - USB camera (index 2) is available
+2025-07-21 17:05:18,620 - INFO - Testing USB camera index 3...
+2025-07-21 17:05:18,621 - INFO - USB camera (index 3) is available
+2025-07-21 17:05:18,622 - INFO - === CAMERA TEST COMPLETE ===

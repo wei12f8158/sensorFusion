@@ -1,39 +1,85 @@
 ./switch_camera_mode.sh
 python3 runImage.py
 
-wei@raspberrypi:~/sensorFusion/cv/running $ python3 fix_plate_detection.py
-2025-07-21 17:28:18,975 - INFO - === FIX PLATE DETECTION ===
-2025-07-21 17:28:20,363 - INFO - Initializing components...
-2025-07-21 17:28:20,366 - INFO - Using TensorFlow Lite runtime
-2025-07-21 17:28:20,367 - INFO - ONNX Runtime not available
+wei@raspberrypi:~/sensorFusion/cv/running $ python3  fix_plate_detection.py
+2025-07-21 17:33:50,819 - INFO - === FIX PLATE DETECTION ===
+2025-07-21 17:33:52,232 - INFO - Initializing components...
+2025-07-21 17:33:52,235 - INFO - Using TensorFlow Lite runtime
+2025-07-21 17:33:52,235 - INFO - ONNX Runtime not available
 Loading model from: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
-2025-07-21 17:28:20,367 - INFO - model: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
-2025-07-21 17:28:20,367 - INFO - Confidence threshold: 0.2
-2025-07-21 17:28:20,367 - INFO - IOU threshold: 0.6
-2025-07-21 17:28:20,367 - INFO - Using GPU: False
-2025-07-21 17:28:20,367 - INFO - Number of threads: 4
-2025-07-21 17:28:20,369 - INFO - Loaded 9 classes
+2025-07-21 17:33:52,236 - INFO - model: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
+2025-07-21 17:33:52,236 - INFO - Confidence threshold: 0.2
+2025-07-21 17:33:52,236 - INFO - IOU threshold: 0.6
+2025-07-21 17:33:52,236 - INFO - Using GPU: False
+2025-07-21 17:33:52,236 - INFO - Number of threads: 4
+2025-07-21 17:33:52,238 - INFO - Loaded 9 classes
 YOLOv8n summary: 129 layers, 3,012,603 parameters, 0 gradients, 8.2 GFLOPs
-2025-07-21 17:28:20,784 - INFO - Successfully loaded PyTorch model: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
-2025-07-21 17:28:20,784 - INFO - Input size: (640, 640)
+2025-07-21 17:33:53,215 - INFO - Successfully loaded PyTorch model: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
+2025-07-21 17:33:53,215 - INFO - Input size: (640, 640)
 self.input_size: <class 'tuple'>, (640, 640)
-2025-07-21 17:28:20,807 - INFO - PyTorch input shape: (640, 640, 3), converted shape: (640, 640, 3)
-2025-07-21 17:28:20,808 - INFO - PyTorch input range: 0.000 to 255.000
-2025-07-21 17:28:20,809 - INFO - PyTorch converted range: 0 to 255
-2025-07-21 17:28:20,820 - INFO - PIL image mode: RGB, size: (640, 640)
-2025-07-21 17:28:20,820 - INFO - Calling YOLO with conf=0.2, iou=0.6
-2025-07-21 17:28:22,509 - INFO - YOLO results: 1
-2025-07-21 17:28:22,509 - INFO - YOLO boxes: 0
-2025-07-21 17:28:22,509 - INFO - YOLO returned results but no boxes found
-2025-07-21 17:28:22,509 - INFO - PyTorch: No detections from YOLO model
-2025-07-21 17:28:22,509 - INFO - inference time 1.7079579830169678
-2025-07-21 17:28:22,509 - INFO - PyTorch model: No raw detections
-2025-07-21 17:28:22,509 - ERROR - Fix failed: 'imagePxlPer_mm'
+2025-07-21 17:33:53,239 - INFO - PyTorch input shape: (640, 640, 3), converted shape: (640, 640, 3)
+2025-07-21 17:33:53,240 - INFO - PyTorch input range: 0.000 to 255.000
+2025-07-21 17:33:53,241 - INFO - PyTorch converted range: 0 to 255
+2025-07-21 17:33:53,252 - INFO - PIL image mode: RGB, size: (640, 640)
+2025-07-21 17:33:53,252 - INFO - Calling YOLO with conf=0.2, iou=0.6
+2025-07-21 17:33:54,970 - INFO - YOLO results: 1
+2025-07-21 17:33:54,970 - INFO - YOLO boxes: 0
+2025-07-21 17:33:54,970 - INFO - YOLO returned results but no boxes found
+2025-07-21 17:33:54,970 - INFO - PyTorch: No detections from YOLO model
+2025-07-21 17:33:54,970 - INFO - inference time 1.737769365310669
+2025-07-21 17:33:54,970 - INFO - PyTorch model: No raw detections
+2025-07-21 17:33:54,971 - INFO - Init: displayHandObject
+qt.qpa.plugin: Could not find the Qt platform plugin "wayland" in "/home/wei/.local/lib/python3.11/site-packages/cv2/qt/plugins"
+2025-07-21 17:33:55,058 - INFO - Capturing frame...
+2025-07-21 17:33:55,059 - INFO - Trying USB camera index 0...
+2025-07-21 17:33:55,061 - INFO - Trying USB camera index 2...
+2025-07-21 17:33:55,063 - INFO - Trying USB camera index 3...
+2025-07-21 17:33:55,064 - INFO - Trying USB camera index 8...
+2025-07-21 17:33:55,751 - INFO - USB camera index 8 works!
+2025-07-21 17:33:55,783 - INFO - Captured frame shape: (480, 640, 3)
+2025-07-21 17:33:55,786 - INFO - Saved raw frame: fix_plate_raw_frame_20250721_173355.jpg
+2025-07-21 17:33:55,787 - INFO - Running Raspberry Pi webcam inference
+2025-07-21 17:33:55,787 - INFO - Input image shape: (480, 640, 3), dtype: uint8
+2025-07-21 17:33:55,791 - INFO - Preprocessed image shape: (640, 640, 3), pad: (0, 160)
+2025-07-21 17:33:55,792 - INFO - Running model forward pass...
+2025-07-21 17:33:55,807 - INFO - PyTorch input shape: (640, 640, 3), converted shape: (640, 640, 3)
+2025-07-21 17:33:55,809 - INFO - PyTorch input range: 0.004 to 1.000
+2025-07-21 17:33:55,809 - INFO - PyTorch converted range: 1 to 255
+2025-07-21 17:33:55,810 - INFO - PIL image mode: RGB, size: (640, 640)
+2025-07-21 17:33:55,810 - INFO - Calling YOLO with conf=0.2, iou=0.6
+2025-07-21 17:33:56,137 - INFO - YOLO results: 1
+2025-07-21 17:33:56,137 - INFO - YOLO boxes: 2
+2025-07-21 17:33:56,139 - INFO - First box: xyxy=tensor([257.0963, 204.8979, 392.4651, 340.4102]), conf=0.9665538668632507, cls=6.0
+2025-07-21 17:33:56,139 - INFO - PyTorch raw output shape: (2, 6)
+2025-07-21 17:33:56,139 - INFO - inference time 0.3474540710449219
+2025-07-21 17:33:56,139 - INFO - PyTorch model: 2 raw detections, 2 after confidence filtering (threshold=0.2)
+2025-07-21 17:33:56,139 - INFO - Model forward returned: <class 'numpy.ndarray'>, value: [[      257.1       204.9      392.47      340.41     0.96655           6]
+ [     117.27      247.77      210.69       364.4     0.92481           4]]
+2025-07-21 17:33:56,140 - INFO - Model output shape: (2, 6)
+2025-07-21 17:33:56,140 - INFO - Model output type: <class 'numpy.ndarray'>
+2025-07-21 17:33:56,140 - INFO - Raw predictions: 2 detections
+2025-07-21 17:33:56,140 - INFO - First raw prediction: [      257.1       204.9      392.47      340.41     0.96655           6]
+2025-07-21 17:33:56,140 - INFO - Processing predictions...
+2025-07-21 17:33:56,140 - INFO - Detected: 1 glove, 1 plate
+2025-07-21 17:33:56,140 - INFO - Final results shape: (2, 6)
+2025-07-21 17:33:56,140 - INFO - Final detections after NMS: 2
+2025-07-21 17:33:56,141 - INFO - Final detection 0: [     354.19       204.9      624.93      340.41     0.96655           6]
+2025-07-21 17:33:56,141 - INFO - Final detection 1: [      74.54      247.77      261.37       364.4     0.92481           4]
+2025-07-21 17:33:56,141 - INFO - Timing - Inference: 0.347s, NMS: 0.000s, Total: 0.348s
+2025-07-21 17:33:56,141 - INFO - Raspberry Pi Inference, nms time: [0.3474540710449219, 0.00010895729064941406]
+2025-07-21 17:33:56,141 - INFO - Model predictions: <class 'tuple'>
+2025-07-21 17:33:56,141 - INFO - Number of detections: 2
+2025-07-21 17:33:56,141 - INFO - Processing 2 raw detections
+2025-07-21 17:33:56,141 - INFO - Hand threshold: 0.2, Object threshold: 0.3
+2025-07-21 17:33:56,141 - INFO - Hand class number: 4
+2025-07-21 17:33:56,141 - INFO - Class mapping: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+2025-07-21 17:33:56,141 - ERROR - Fix failed: index 5 is out of bounds for axis 0 with size 2
 Traceback (most recent call last):
-  File "/home/wei/sensorFusion/cv/running/fix_plate_detection.py", line 51, in fix_plate_detection
-    distance_calc = distanceCalculator(configs['training']['imageSize'], configs)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/wei/sensorFusion/cv/running/distance.py", line 27, in __init__
-    self.pxPer_mm  = config['imagePxlPer_mm'] #How many pixels per mm
-                     ~~~~~~^^^^^^^^^^^^^^^^^^
-KeyError: 'imagePxlPer_mm'
+  File "/home/wei/sensorFusion/cv/running/fix_plate_detection.py", line 112, in fix_plate_detection
+    valid = distance_calc.loadData(predictions)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wei/sensorFusion/cv/running/distance.py", line 76, in loadData
+    objClass = int(object[classField])
+                   ~~~~~~^^^^^^^^^^^^
+IndexError: index 5 is out of bounds for axis 0 with size 2
+

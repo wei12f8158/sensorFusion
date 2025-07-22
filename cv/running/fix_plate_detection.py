@@ -48,7 +48,7 @@ def fix_plate_detection():
             if torch.backends.mps.is_available() and torch.backends.mps.is_built(): device = "mps"
         
         model_runtime = modelRunTime(configs, device)
-        distance_calc = distanceCalculator(configs['training']['imageSize'], configs)
+        distance_calc = distanceCalculator(configs['training']['imageSize'], configs['runTime']['distSettings'])
         display_obj = displayHandObject(configs)
         
         # Capture a frame

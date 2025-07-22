@@ -119,35 +119,60 @@ class distanceCalculator:
             logger.info(f"loadData: we need at least one hand:{self.nHands} and one target:{self.nNonHand}")
             return False
         
-        # Once we have the hand object, get the closest distance
-        logger.info("Calculating distances to find closest object...")
+        # Once we have the hand object, select the best target object
+        logger.info("Selecting best target object...")
         
-        # FIX: Prioritize plate class (class 6) over distance
-        plate_found = False
-        for object in data:
-            if object[classField] != self.handClassNum and object[confField] >= self.oThresh: 
-                # If this is a plate (class 6), prioritize it
-                if object[classField] == 6:  # Plate class
-                    logger.info(f"Found plate (class 6) with confidence {object[confField]:.3f}")
-                    self.grabObject = torch.tensor([float(x) for x in object])
-                    self.bestDist = self.calcDist(object)
-                    self.bestCenter = self.findCenter(object)
-                    plate_found = True
-                    logger.info(f"Selected plate as target object")
+        # FIX: Use class-based priority for ALL objects (like hand detection)
+        # Priority order: plate (6) > apple (0) > ball (1) > bottle (2) > clip (3) > lid (5) > spoon (7) > tape spool (8)
+        priority_classes = [6, 0, 1, 2, 3, 5, 7, 8]  # Plate first, then others by priority
+        
+        target_object = None
+        target_class = None
+        
+        # First pass: find highest priority class
+        for priority_class in priority_classes:
+            for object in data:
+                if object[classField] == priority_class and object[confField] >= self.oThresh:
+                    logger.info(f"Found priority object: class {priority_class} with confidence {object[confField]:.3f}")
+                    target_object = object
+                    target_class = priority_class
                     break
+            if target_object is not None:
+                break
         
-        # If no plate found, fall back to closest object
-        if not plate_found:
+        # If no priority object found, fall back to highest confidence object
+        if target_object is None:
+            logger.info("No priority object found, selecting highest confidence object...")
+            best_confidence = 0
+            for object in data:
+                if object[classField] != self.handClassNum and object[confField] >= self.oThresh:
+                    if object[confField] > best_confidence:
+                        best_confidence = object[confField]
+                        target_object = object
+                        target_class = object[classField]
+                        logger.info(f"Selected highest confidence object: class {target_class} with confidence {best_confidence:.3f}")
+        
+        # If still no object found, fall back to closest object (original logic)
+        if target_object is None:
+            logger.info("No high-confidence object found, selecting closest object...")
             for object in data:
                 if object[classField] != self.handClassNum and object[confField] >= self.oThresh: 
                     thisDist = self.calcDist(object)
                     logger.info(f"Distance to object (class {object[classField]}): {thisDist:.1f}mm")
                     if thisDist < self.bestDist: 
-                        # Convert the entire object to a PyTorch tensor
-                        self.grabObject = torch.tensor([float(x) for x in object])
+                        target_object = object
+                        target_class = object[classField]
                         self.bestDist = thisDist
-                        self.bestCenter = self.findCenter(object)
-                        logger.info(f"New closest object: {thisDist:.1f}mm")
+                        logger.info(f"Selected closest object: class {target_class} at {thisDist:.1f}mm")
+        
+        # Set the selected object
+        if target_object is not None:
+            self.grabObject = torch.tensor([float(x) for x in target_object])
+            self.bestDist = self.calcDist(target_object)
+            self.bestCenter = self.findCenter(target_object)
+            logger.info(f"Final selection: class {target_class} with center {self.bestCenter}")
+        else:
+            logger.warning("No suitable target object found")
 
         logger.info(f"N objects detected: hands = {self.nHands}, non hands = {self.nNonHand},  Distance = {self.bestDist:.0f}mm")
         return True

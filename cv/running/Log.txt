@@ -2,12 +2,11 @@
 
 
 wei@raspberrypi:~/sensorFusion/cv/running $ python3 diagnose_realtime_vs_static.py
-2025-07-21 16:58:02,855 - INFO - === DIAGNOSE REAL-TIME VS STATIC ===
-2025-07-21 16:58:02,864 - INFO - Model path: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
-2025-07-21 16:58:02,864 - INFO - Expected image size: [480, 640]
-2025-07-21 16:58:02,864 - ERROR - Diagnosis failed: 'cameraSource'
-Traceback (most recent call last):
-  File "/home/wei/sensorFusion/cv/running/diagnose_realtime_vs_static.py", line 37, in capture_and_analyze_frame
-    camera_source = configs['runTime']['cameraSource']
-                    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
-KeyError: 'cameraSource'
+2025-07-21 17:01:34,707 - INFO - === DIAGNOSE REAL-TIME VS STATIC ===
+2025-07-21 17:01:34,716 - INFO - Model path: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
+2025-07-21 17:01:34,716 - INFO - Expected image size: [480, 640]
+2025-07-21 17:01:34,716 - INFO - Image source: camera
+2025-07-21 17:01:34,716 - INFO - Use IMX500: False
+2025-07-21 17:01:34,717 - INFO - Capturing frame from camera...
+2025-07-21 17:01:34,717 - ERROR - Failed to capture frame
+

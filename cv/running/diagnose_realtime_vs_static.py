@@ -34,10 +34,12 @@ def capture_and_analyze_frame():
         logger.info(f"Expected image size: {image_size}")
         
         # Initialize camera
-        camera_source = configs['runTime']['cameraSource']
-        logger.info(f"Camera source: {camera_source}")
+        img_src = configs['runTime']['imgSrc']
+        use_imx500 = configs['runTime']['use_imx500']
+        logger.info(f"Image source: {img_src}")
+        logger.info(f"Use IMX500: {use_imx500}")
         
-        if camera_source == "USB":
+        if img_src == "camera" and not use_imx500:
             cap = cv2.VideoCapture(0)  # USB camera
         else:
             # IMX500 camera
@@ -167,7 +169,7 @@ def capture_and_analyze_frame():
                     logger.info(f"Saved annotated comparison: annotated_comparison_{timestamp}.jpg")
         
         # Clean up
-        if camera_source == "USB":
+        if img_src == "camera" and not use_imx500:
             cap.release()
         else:
             picam2.close()

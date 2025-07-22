@@ -2,13 +2,38 @@
 python3 runImage.py
 
 wei@raspberrypi:~/sensorFusion/cv/running $ python3 fix_plate_detection.py
-2025-07-21 17:23:36,876 - INFO - === FIX PLATE DETECTION ===
-2025-07-21 17:23:38,255 - INFO - Initializing components...
-2025-07-21 17:23:38,256 - ERROR - Fix failed: modelRunTime.__init__() missing 1 required positional argument: 'device'
+2025-07-21 17:28:18,975 - INFO - === FIX PLATE DETECTION ===
+2025-07-21 17:28:20,363 - INFO - Initializing components...
+2025-07-21 17:28:20,366 - INFO - Using TensorFlow Lite runtime
+2025-07-21 17:28:20,367 - INFO - ONNX Runtime not available
+Loading model from: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
+2025-07-21 17:28:20,367 - INFO - model: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
+2025-07-21 17:28:20,367 - INFO - Confidence threshold: 0.2
+2025-07-21 17:28:20,367 - INFO - IOU threshold: 0.6
+2025-07-21 17:28:20,367 - INFO - Using GPU: False
+2025-07-21 17:28:20,367 - INFO - Number of threads: 4
+2025-07-21 17:28:20,369 - INFO - Loaded 9 classes
+YOLOv8n summary: 129 layers, 3,012,603 parameters, 0 gradients, 8.2 GFLOPs
+2025-07-21 17:28:20,784 - INFO - Successfully loaded PyTorch model: /home/wei/YOLO/yolo8_19_UL-New_day2_fullLabTopCam_60epochs.pt
+2025-07-21 17:28:20,784 - INFO - Input size: (640, 640)
+self.input_size: <class 'tuple'>, (640, 640)
+2025-07-21 17:28:20,807 - INFO - PyTorch input shape: (640, 640, 3), converted shape: (640, 640, 3)
+2025-07-21 17:28:20,808 - INFO - PyTorch input range: 0.000 to 255.000
+2025-07-21 17:28:20,809 - INFO - PyTorch converted range: 0 to 255
+2025-07-21 17:28:20,820 - INFO - PIL image mode: RGB, size: (640, 640)
+2025-07-21 17:28:20,820 - INFO - Calling YOLO with conf=0.2, iou=0.6
+2025-07-21 17:28:22,509 - INFO - YOLO results: 1
+2025-07-21 17:28:22,509 - INFO - YOLO boxes: 0
+2025-07-21 17:28:22,509 - INFO - YOLO returned results but no boxes found
+2025-07-21 17:28:22,509 - INFO - PyTorch: No detections from YOLO model
+2025-07-21 17:28:22,509 - INFO - inference time 1.7079579830169678
+2025-07-21 17:28:22,509 - INFO - PyTorch model: No raw detections
+2025-07-21 17:28:22,509 - ERROR - Fix failed: 'imagePxlPer_mm'
 Traceback (most recent call last):
-  File "/home/wei/sensorFusion/cv/running/fix_plate_detection.py", line 38, in fix_plate_detection
-    model_runtime = modelRunTime(configs)
-                    ^^^^^^^^^^^^^^^^^^^^^
-TypeError: modelRunTime.__init__() missing 1 required positional argument: 'device'
-
-
+  File "/home/wei/sensorFusion/cv/running/fix_plate_detection.py", line 51, in fix_plate_detection
+    distance_calc = distanceCalculator(configs['training']['imageSize'], configs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wei/sensorFusion/cv/running/distance.py", line 27, in __init__
+    self.pxPer_mm  = config['imagePxlPer_mm'] #How many pixels per mm
+                     ~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'imagePxlPer_mm'

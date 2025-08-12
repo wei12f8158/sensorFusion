@@ -9,6 +9,6 @@ imx500-package -i ~/sensorFusion/IMX500/yolov8n_imx_model/packerOut.zip -o final
 
 deactivate
 
-python3 /media/wei/MIC_Data/sensorFusion/picamera2/examples/imx500/imx500_object_detection_demo.py \
-  --model /home/wei/sensorFusion/IMX500/yolov8n_imx_model/final_output \
-  --labels /home/wei/sensorFusion/IMX500/yolov8n_imx_model/final_output/labels.txt
+python3 examples/imx500/imx500_object_detection_demo.py \
+  --model ~/sensorFusion/IMX500/yolov8n_imx_model/final_output/network.rpk \
+  --labels ~/sensorFusion/IMX500/yolov8n_imx_model/labels.txt

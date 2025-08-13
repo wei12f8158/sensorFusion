@@ -75,7 +75,7 @@ runTime:
     use_imx500: False  # Set to True to use IMX500
     imx500_ai_camera: True  # Set to True for AI camera mode, False for camera source mode
     imx500_model: "../../IMX500/yolov8n_imx_model/final_output/network.rpk"
-    imx500_labels: "../../IMX500/yolo8_19_UL-New_day2_fullLabTopCam_60epochs_imx_model/labels.txt"
+    imx500_labels: "../../IMX500/yolov8n_imx_model/labels.txt"
     imx500_threshold: 0.5
     imx500_iou: 0.5
     imx500_max_detections: 10
